@@ -1,0 +1,11 @@
+{
+  "manifest_version": 2,
+
+  "name": "KeePass Chrome",
+  "description": "A Chrome extension for KeePass",
+  "version": "0.1",
+
+  "browser_action": {
+    "default_popup": "popup.html"
+  }
+}
