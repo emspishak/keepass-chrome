@@ -2,8 +2,14 @@
 <html>
   <head>
     <title>KeePass Chrome</title>
+    <script src="popup.js"></script>
   </head>
   <body>
     <h1>KeePass Chrome</h1>
+    <div>
+      Enter the name of your key file:<input id="key-file-name" value="passwords.kdb">
+      <button id="key-file-search">Search</button>
+    </div>
+    <ul id="files"></ul>
   </body>
 </html>

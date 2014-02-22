@@ -1,11 +1,26 @@
 {
   "manifest_version": 2,
+  "minimum_chrome_version": "29",
+
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjyQ2DLQvVhUYTVSmdp8uXYlYk3odntqcPcR1YdAXCIk7BjxhmuRDQKQhSdy2TWo/N7iw0vPZ156IHhOhXIBsS2mO4XNOwDe/LZG+IbzjdVjUeBNf5d632peb4kE5Wo+0usQndgicl+D4vhGB0HDDG08URK4dG5+vFVzB7fANNx+PPQlhVb/1uaU29nLULBIHpt3APu3YY2OfbJb0u1soArKiXVzFTYq+a8V/7rb3OVCG64MWpBJ5iCPOGk4DGsMRa5i9VBu1P7YFw177kz/neY4vWMtz7ApYTbWB/azM+Tdq4OOIZM16ENV0RpCKO/Xzwf3lX1EupOzgTX8DGRIWWQIDAQAB",
 
   "name": "KeePass Chrome",
   "description": "A Chrome extension for KeePass",
   "version": "0.1",
 
+  "permissions": [
+    "identity",
+    "https://www.googleapis.com/drive/v2"
+  ],
+
   "browser_action": {
     "default_popup": "popup.html"
+  },
+
+  "oauth2": {
+    "client_id": "471873024102-gomvustevsusou01uab4rdmcqelrhl5u.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive"
+    ]
   }
 }
