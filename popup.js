@@ -8,7 +8,7 @@ function main() {
 
 function searchForKeyFile() {
   var query = document.getElementById('key-file-name').value;
-  var encodedQuery = encodeURIComponent(query).replace("'", "\\'")
+  var encodedQuery = encodeURIComponent(query).replace("'", "\\'");
   sendXhr('GET', API_BASE + '/files?q=title+=+\'' + encodedQuery + '\'', displayFiles);
 }
 
