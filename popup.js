@@ -82,5 +82,9 @@ function fetchKeyFile() {
 
 function processKeyFile() {
   var file = new KeyFileParser(this.response).parse();
+  if (file['error']) {
+    showError(file['error']);
+    return;
+  }
   console.log(file);
 }

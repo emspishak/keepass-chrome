@@ -1,11 +1,19 @@
 function KeyFileParser(arraybuffer) {
   this.bytes_ = new BinaryReader(arraybuffer);
 }
+KeyFileParser.DATABASE_SIGNATURE_1 = 2594363651;
+KeyFileParser.DATABASE_SIGNATURE_2 = 3041655653;
+KeyFileParser.DATABASE_VERSION = 196612;
+KeyFileParser.DATABASE_VERSION_MASK = 4294967040;
 
 KeyFileParser.prototype.parse = function() {
-  return {
-    "header": this.parseHeader_()
-  };
+  var result = {};
+  result['header'] = this.parseHeader_();
+  if (!this.verifyVersion_(result['header'])) {
+    result['error'] = 'Invalid key file version';
+    return result;
+  }
+  return result;
 };
 
 KeyFileParser.prototype.parseHeader_ = function() {
@@ -32,4 +40,11 @@ KeyFileParser.prototype.parseHeaderFlags_ = function() {
     "arcfour": !!(b & 4),
     "twofish": !!(b & 8)
   };
+};
+
+KeyFileParser.prototype.verifyVersion_ = function(header) {
+  return header['signature1'] == KeyFileParser.DATABASE_SIGNATURE_1
+      && header['signature2'] == KeyFileParser.DATABASE_SIGNATURE_2
+      && (header['version'] & KeyFileParser.DATABASE_VERSION_MASK)
+          == (KeyFileParser.DATABASE_VERSION & KeyFileParser.DATABASE_VERSION_MASK);
 };
