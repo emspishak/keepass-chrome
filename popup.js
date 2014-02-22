@@ -28,8 +28,10 @@ function displayFiles() {
   ul.innerHTML = '';
   if (files.items.length) {
     for (var i = 0; i < files.items.length; i++) {
+      var file = files.items[i];
       var li = document.createElement('li');
-      li.textContent = files.items[i].title;
+      li.textContent = file.title;
+      li.addEventListener('click', handleKeyFileClick.bind(undefined, file.id));
       ul.appendChild(li);
     }
   } else {
@@ -37,4 +39,8 @@ function displayFiles() {
     li.textContent = 'No results';
     ul.appendChild(li);
   }
+}
+
+function handleKeyFileClick(keyFileId) {
+  chrome.storage.sync.set({'keyFileId': keyFileId});
 }
