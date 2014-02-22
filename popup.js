@@ -81,5 +81,6 @@ function fetchKeyFile() {
 }
 
 function processKeyFile() {
-  var data = this.response;
+  var bytes = new BinaryReader(this.response);
+  console.log('first int: ' + bytes.readInt());
 }
