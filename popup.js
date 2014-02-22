@@ -25,9 +25,16 @@ function sendXhr(method, url, callback) {
 function displayFiles() {
   var files = JSON.parse(this.responseText);
   var ul = document.getElementById('files');
-  for (var i = 0; i < files.items.length; i++) {
+  ul.innerHTML = '';
+  if (files.items.length) {
+    for (var i = 0; i < files.items.length; i++) {
+      var li = document.createElement('li');
+      li.textContent = files.items[i].title;
+      ul.appendChild(li);
+    }
+  } else {
     var li = document.createElement('li');
-    li.textContent = files.items[i].title;
+    li.textContent = 'No results';
     ul.appendChild(li);
   }
 }
