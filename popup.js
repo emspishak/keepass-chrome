@@ -6,6 +6,13 @@ function main() {
   document.getElementById('key-file-search').addEventListener('click', searchForKeyFile);
 }
 
+function checkError() {
+  if (chrome.runtime.lastError) {
+    document.getElementById('error').textContent = chrome.runtime.lastError.message;
+  }
+  return !!chrome.runtime.lastError;
+}
+
 function searchForKeyFile() {
   var query = document.getElementById('key-file-name').value;
   var encodedQuery = encodeURIComponent(query).replace("'", "\\'");
@@ -14,6 +21,9 @@ function searchForKeyFile() {
 
 function sendXhr(method, url, callback) {
   chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
+    if (checkError()) {
+      return;
+    }
     var xhr = new XMLHttpRequest();
     xhr.open(method, url);
     xhr.setRequestHeader('Authorization', 'Bearer ' + token);
@@ -42,5 +52,10 @@ function displayFiles() {
 }
 
 function handleKeyFileClick(keyFileId) {
-  chrome.storage.sync.set({'keyFileId': keyFileId});
+  var items = {'keyFileId': keyFileId};
+  chrome.storage.sync.set(items, function() {
+    if (checkError()) {
+      return;
+    }
+  });
 }
