@@ -6,9 +6,13 @@ function main() {
   document.getElementById('key-file-search').addEventListener('click', searchForKeyFile);
 }
 
+function showError(message) {
+  document.getElementById('error').textContent = message;
+}
+
 function checkError() {
   if (chrome.runtime.lastError) {
-    document.getElementById('error').textContent = chrome.runtime.lastError.message;
+    showError(chrome.runtime.lastError.message);
   }
   return !!chrome.runtime.lastError;
 }
@@ -19,13 +23,16 @@ function searchForKeyFile() {
   sendXhr('GET', API_BASE + '/files?q=title+=+\'' + encodedQuery + '\'', displayFiles);
 }
 
-function sendXhr(method, url, callback) {
+function sendXhr(method, url, callback, opt_responseType) {
   chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
     if (checkError()) {
       return;
     }
     var xhr = new XMLHttpRequest();
     xhr.open(method, url);
+    if (opt_responseType) {
+      xhr.responseType = opt_responseType;
+    }
     xhr.setRequestHeader('Authorization', 'Bearer ' + token);
     xhr.onload = callback;
     xhr.send();
@@ -52,10 +59,27 @@ function displayFiles() {
 }
 
 function handleKeyFileClick(keyFileId) {
-  var items = {'keyFileId': keyFileId};
-  chrome.storage.sync.set(items, function() {
+  chrome.storage.sync.set({'keyFileId': keyFileId}, function() {
     if (checkError()) {
       return;
     }
+    fetchKeyFileMetadata(keyFileId);
   });
+}
+
+function fetchKeyFileMetadata(keyFileId) {
+  if (!keyFileId) {
+    showError('No key file ID');
+  }
+  sendXhr('GET', API_BASE + '/files/' + keyFileId, fetchKeyFile);
+}
+
+function fetchKeyFile() {
+  var file = JSON.parse(this.responseText);
+  var downloadUrl = file['downloadUrl'];
+  sendXhr('GET', downloadUrl, processKeyFile, 'arraybuffer');
+}
+
+function processKeyFile() {
+  var data = this.response;
 }
