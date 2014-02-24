@@ -19,8 +19,8 @@ KeyFileParser.prototype.parse = function() {
       header['keyEncryptionRounds']);
   var decryptedData = this.decryptFile_(header['flags'], encryptedData, key,
       header['encryptionInitialValue'], header['contentsHash']);
-  if (decryptedData instanceof String) {
-    result['error'] = decryptedData;
+  if (decryptedData['error']) {
+    result['error'] = decryptedData['error'];
     return result;
   }
   result['decryptedData'] = decryptedData;
@@ -91,11 +91,11 @@ KeyFileParser.prototype.decryptFile_ = function(headerFlags, encryptedData, key,
   } else if (headerFlags['twofish']) {
     decryptedData = this.decryptTwoFish_(cipherParams, key, cfg);
   } else {
-    return 'Invalid encryption type';
+    return { "error": "Invalid encryption type" };
   }
   var hash = CryptoJS.SHA256(decryptedData);
   if (hash.toString() !== contentsHash.toString()) {
-    return 'Invalid password';
+    return { "error": "Invalid password" };
   }
   return decryptedData;
 };
