@@ -59,17 +59,9 @@ function displayFiles() {
 }
 
 function handleKeyFileClick(keyFileId) {
-  chrome.storage.sync.set({'keyFileId': keyFileId}, function() {
-    if (checkError()) {
-      return;
-    }
-    fetchKeyFileMetadata(keyFileId);
-  });
-}
-
-function fetchKeyFileMetadata(keyFileId) {
   if (!keyFileId) {
     showError('No key file ID');
+    return;
   }
   sendXhr('GET', API_BASE + '/files/' + keyFileId, fetchKeyFile);
 }
