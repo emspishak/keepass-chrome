@@ -80,11 +80,16 @@ KeyFileParser.prototype.decryptFile_ = function(headerFlags, encryptedData, key,
   var cipherParams = CryptoJS.lib.CipherParams.create({
       ciphertext: encryptedData
   });
+  var cfg = {
+    "mode": CryptoJS.mode.CBC,
+    "iv": encryptionInitialValue,
+    "padding": CryptoJS.pad.Pkcs7
+  };
   var decryptedData;
   if (headerFlags['rijndael']) {
-    decryptedData = this.decryptAes_(cipherParams, key, encryptionInitialValue);
+    decryptedData = this.decryptAes_(cipherParams, key, cfg);
   } else if (headerFlags['twofish']) {
-    throw new Exception('twofish decryption not yet supported.');
+    decryptedData = this.decryptTwoFish_(cipherParams, key, cfg);
   } else {
     return 'Invalid encryption type';
   }
@@ -95,13 +100,14 @@ KeyFileParser.prototype.decryptFile_ = function(headerFlags, encryptedData, key,
   return decryptedData;
 };
 
-KeyFileParser.prototype.decryptAes_ = function(cipherParams, key, encryptionInitialValue) {
-  var cfg = {
-    "mode": CryptoJS.mode.CBC,
-    "iv": encryptionInitialValue,
-    "padding": CryptoJS.pad.Pkcs7
-  };
+KeyFileParser.prototype.decryptAes_ = function(cipherParams, key, cfg) {
   var decryptedData = CryptoJS.AES.decrypt(cipherParams, key, cfg);
+  decryptedData.clamp();
+  return decryptedData;
+};
+
+KeyFileParser.prototype.decryptTwoFish_ = function(cipherParams, key, cfg) {
+  var decryptedData = CryptoJS.TwoFish.decrypt(cipherParams, key, cfg);
   decryptedData.clamp();
   return decryptedData;
 };
