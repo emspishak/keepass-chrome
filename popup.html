@@ -15,10 +15,18 @@
   <body>
     <h1>KeePass Chrome</h1>
     <div id="error"></div>
-    <div>
-      Enter the name of your key file:<input id="key-file-name" value="passwords.kdb">
+    <div id="key-file-select">
+      Enter the name of your key file: <input id="key-file-name" value="passwords.kdb">
       <button id="key-file-search">Search</button>
+      <ul id="files"></ul>
     </div>
-    <ul id="files"></ul>
+    <div id="master-password-enter">
+      Enter your master password: <input type="password" id="master-password">
+      <button id="master-password-ok">OK</button>
+    </div>
+    <div id="loading">
+      <img src="loading.gif" alt="loading">
+      <span id="loading-message"></span>
+    </div>
   </body>
 </html>

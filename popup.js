@@ -10,6 +10,10 @@ function showError(message) {
   document.getElementById('error').textContent = message;
 }
 
+function hideError() {
+  document.getElementById('error').innerHTML = '';
+}
+
 function checkError() {
   if (chrome.runtime.lastError) {
     showError(chrome.runtime.lastError.message);
@@ -20,6 +24,8 @@ function checkError() {
 function searchForKeyFile() {
   var query = document.getElementById('key-file-name').value;
   var encodedQuery = encodeURIComponent(query).replace("'", "\\'");
+  document.getElementById('files').innerHTML = '';
+  showLoading("Searching Drive...");
   sendXhr('GET', API_BASE + '/files?q=title+=+\'' + encodedQuery + '\'', displayFiles);
 }
 
@@ -56,6 +62,7 @@ function displayFiles() {
     li.textContent = 'No results';
     ul.appendChild(li);
   }
+  hideLoading();
 }
 
 function handleKeyFileClick(keyFileId) {
@@ -63,6 +70,17 @@ function handleKeyFileClick(keyFileId) {
     showError('No key file ID');
     return;
   }
+  document.getElementById('key-file-select').style.display = 'none';
+  document.getElementById('master-password-ok').addEventListener('click',
+      handleMasterPasswordOkClick.bind(undefined, keyFileId));
+  showMasterPassword();
+}
+
+function handleMasterPasswordOkClick(keyFileId) {
+  // If the 'invalid password' error is shown.
+  hideError();
+  document.getElementById('master-password-enter').style.display = 'none';
+  showLoading('Getting key file...');
   sendXhr('GET', API_BASE + '/files/' + keyFileId, fetchKeyFile);
 }
 
@@ -73,10 +91,28 @@ function fetchKeyFile() {
 }
 
 function processKeyFile() {
-  var file = new KeyFileParser(this.response).parse();
+  showLoading('Processing key file...');
+  var password = document.getElementById('master-password').value;
+  var file = new KeyFileParser(this.response).parse(password);
+  hideLoading();
   if (file['error']) {
     showError(file['error']);
+    showMasterPassword();
     return;
   }
   console.log(file);
+}
+
+function showLoading(message) {
+  document.getElementById('loading-message').textContent = message;
+  document.getElementById('loading').style.display = 'initial';
+}
+
+function hideLoading() {
+  document.getElementById('loading').style.display = 'none';
+}
+
+function showMasterPassword() {
+  document.getElementById('master-password-enter').style.display = 'initial';
+  document.getElementById('master-password').focus();
 }

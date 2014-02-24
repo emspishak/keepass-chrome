@@ -5,3 +5,11 @@ body {
 #error {
   color: red;
 }
+
+#loading {
+  display: none;
+}
+
+#master-password-enter {
+  display: none;
+}

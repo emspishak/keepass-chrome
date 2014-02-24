@@ -6,7 +6,7 @@ KeyFileParser.DATABASE_SIGNATURE_2 = 3041655653;
 KeyFileParser.DATABASE_VERSION = 196612;
 KeyFileParser.DATABASE_VERSION_MASK = 4294967040;
 
-KeyFileParser.prototype.parse = function() {
+KeyFileParser.prototype.parse = function(password) {
   var result = {};
   var header = this.parseHeader_();
   result['header'] = header;
@@ -15,7 +15,7 @@ KeyFileParser.prototype.parse = function() {
     return result;
   }
   var encryptedData = this.bytes_.readRestToWordArray();
-  var key = this.transformKey_(header['masterSeed'], header['masterSeed2'],
+  var key = this.transformKey_(password, header['masterSeed'], header['masterSeed2'],
       header['keyEncryptionRounds']);
   var decryptedData = this.decryptFile_(header['flags'], encryptedData, key,
       header['encryptionInitialValue'], header['contentsHash']);
@@ -60,9 +60,8 @@ KeyFileParser.prototype.verifyVersion_ = function(header) {
           == (KeyFileParser.DATABASE_VERSION & KeyFileParser.DATABASE_VERSION_MASK);
 };
 
-KeyFileParser.prototype.transformKey_ = function(masterSeed, masterSeed2,
+KeyFileParser.prototype.transformKey_ = function(plainTextKey, masterSeed, masterSeed2,
       keyEncryptionRounds) {
-  var plainTextKey = 'testing';
   var hashedKey = CryptoJS.SHA256(plainTextKey);
   var encrypted = hashedKey;
   var cfg = {
