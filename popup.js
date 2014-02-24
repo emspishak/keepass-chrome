@@ -3,6 +3,7 @@ var API_BASE = 'https://www.googleapis.com/drive/v2';
 document.addEventListener('DOMContentLoaded', main);
 
 function main() {
+  onEnter('key-file-name', searchForKeyFile);
   document.getElementById('key-file-search').addEventListener('click', searchForKeyFile);
 }
 
@@ -71,8 +72,9 @@ function handleKeyFileClick(keyFileId) {
     return;
   }
   document.getElementById('key-file-select').style.display = 'none';
-  document.getElementById('master-password-ok').addEventListener('click',
-      handleMasterPasswordOkClick.bind(undefined, keyFileId));
+  var callback = handleMasterPasswordOkClick.bind(undefined, keyFileId);
+  onEnter('master-password', callback);
+  document.getElementById('master-password-ok').addEventListener('click', callback);
   showMasterPassword();
 }
 
@@ -115,4 +117,12 @@ function hideLoading() {
 function showMasterPassword() {
   document.getElementById('master-password-enter').style.display = 'initial';
   document.getElementById('master-password').focus();
+}
+
+function onEnter(id, callback) {
+  document.getElementById(id).addEventListener('keyup', function(event) {
+    if (event.keyCode == 13) {
+      callback();
+    }
+  });
 }
