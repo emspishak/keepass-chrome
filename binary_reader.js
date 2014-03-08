@@ -1,10 +1,13 @@
-function BinaryReader(arraybuffer) {
+function BinaryReader(arraybuffer, opt_length) {
   this.data_ = new Uint8Array(arraybuffer);
+  this.length_ = opt_length || arraybuffer.byteLength;
   this.pos_ = 0;
 }
 
 BinaryReader.fromWordArray = function(wordArray) {
-  var buf = new ArrayBuffer(wordArray.sigBytes);
+  var length = Math.ceil(wordArray.sigBytes / Uint32Array.BYTES_PER_ELEMENT) *
+                   Uint32Array.BYTES_PER_ELEMENT;
+  var buf = new ArrayBuffer(length);
   var words = new Uint32Array(buf);
   // swap endianness, from http://stackoverflow.com/questions/5320439/#answer-5320624
   words.set(wordArray.words.map(function(val) {
@@ -13,15 +16,15 @@ BinaryReader.fromWordArray = function(wordArray) {
            | ((val >> 8) & 0xFF00)
            | ((val >> 24) & 0xFF);
   }));
-  return new BinaryReader(buf);
+  return new BinaryReader(buf, wordArray.sigBytes);
 };
 
 BinaryReader.prototype.hasNextByte = function() {
-  return this.pos_ < this.data_.length;
+  return this.pos_ < this.length_;
 };
 
 BinaryReader.prototype.hasNextInt = function() {
-  return this.pos_ < this.data_.length - 3;
+  return this.pos_ < this.length_ - 3;
 };
 
 BinaryReader.prototype.readByte = function() {
