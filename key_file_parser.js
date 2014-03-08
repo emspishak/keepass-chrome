@@ -24,6 +24,7 @@ KeyFileParser.prototype.parse = function(password) {
     return result;
   }
   result['decryptedData'] = decryptedData;
+  var rest = BinaryReader.fromWordArray(decryptedData);
   return result;
 };
 

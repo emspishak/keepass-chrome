@@ -3,6 +3,19 @@ function BinaryReader(arraybuffer) {
   this.pos_ = 0;
 }
 
+BinaryReader.fromWordArray = function(wordArray) {
+  var buf = new ArrayBuffer(wordArray.sigBytes);
+  var words = new Uint32Array(buf);
+  // swap endianness, from http://stackoverflow.com/questions/5320439/#answer-5320624
+  words.set(wordArray.words.map(function(val) {
+    return ((val & 0xFF) << 24)
+           | ((val & 0xFF00) << 8)
+           | ((val >> 8) & 0xFF00)
+           | ((val >> 24) & 0xFF);
+  }));
+  return new BinaryReader(buf);
+};
+
 BinaryReader.prototype.hasNextByte = function() {
   return this.pos_ < this.data_.length;
 };
