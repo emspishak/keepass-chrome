@@ -39,13 +39,21 @@ BinaryReader.prototype.readBytes = function(num) {
   return bytes;
 };
 
-BinaryReader.prototype.readInt = function() {
-  var bytes = this.readBytes(4);
+BinaryReader.prototype.readNumber_ = function(bytes) {
+  var bytes = this.readBytes(bytes);
   var result = 0;
   for (var i = bytes.length - 1; i >= 0; i--) {
     result = (result * 256) + bytes[i];
   }
   return result;
+};
+
+BinaryReader.prototype.readShort = function() {
+  return this.readNumber_(2);
+};
+
+BinaryReader.prototype.readInt = function() {
+  return this.readNumber_(4);
 };
 
 BinaryReader.prototype.readWord = function() {
@@ -74,4 +82,15 @@ BinaryReader.prototype.readRestToWordArray = function() {
     numBytes += 4;
   }
   return CryptoJS.lib.WordArray.create(restOfFile, numBytes);
+};
+
+// Reads in a null-terminated string.
+BinaryReader.prototype.readString = function() {
+  var result = '';
+  var b = this.readByte();
+  while (b != 0) {
+    result += String.fromCharCode(b);
+    b = this.readByte();
+  }
+  return result;
 };
