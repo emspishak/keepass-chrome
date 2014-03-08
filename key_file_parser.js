@@ -25,6 +25,7 @@ KeyFileParser.prototype.parse = function(password) {
   }
   result['decryptedData'] = decryptedData;
   var rest = BinaryReader.fromWordArray(decryptedData);
+  this.parseContents_(rest, header);
   return result;
 };
 
@@ -110,4 +111,47 @@ KeyFileParser.prototype.decryptTwoFish_ = function(cipherParams, key, cfg) {
   var decryptedData = CryptoJS.TwoFish.decrypt(cipherParams, key, cfg);
   decryptedData.clamp();
   return decryptedData;
+};
+
+KeyFileParser.prototype.parseContents_ = function(contents, header) {
+  var groups = [];
+  var levels = [];
+  for (var curGroup = 0; curGroup < header['groups']; curGroup++) {
+    groups.push(this.readGroup_(contents, levels));
+  }
+};
+
+KeyFileParser.prototype.readGroup_ = function(contents, levels) {
+  var group = {};
+  var fieldType = -1;
+  while (fieldType != 65535) {
+    fieldType = contents.readShort();
+    var fieldSize = contents.readInt();
+    switch (fieldType) {
+      case 1:
+        group['id'] = contents.readInt();
+        break;
+      case 2:
+        group['title'] = contents.readString();
+        break;
+      case 7:
+        group['image'] = contents.readInt();
+        break;
+      case 8:
+        levels.push(contents.readShort());
+        break;
+      // Unused field types
+      case 0:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+      case 9:
+      case 65535:
+      default:
+        contents.readBytes(fieldSize);
+        break;
+    }
+  }
+  return group;
 };
