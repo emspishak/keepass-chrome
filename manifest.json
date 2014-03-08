@@ -10,7 +10,6 @@
 
   "permissions": [
     "identity",
-    "storage",
     "https://www.googleapis.com/drive/v2"
   ],
 
