@@ -25,7 +25,7 @@ KeyFileParser.prototype.parse = function(password) {
   }
   result['decryptedData'] = decryptedData;
   var rest = BinaryReader.fromWordArray(decryptedData);
-  this.parseContents_(rest, header);
+  this.parseContents_(rest, header['groups'], header['entries']);
   return result;
 };
 
@@ -113,11 +113,15 @@ KeyFileParser.prototype.decryptTwoFish_ = function(cipherParams, key, cfg) {
   return decryptedData;
 };
 
-KeyFileParser.prototype.parseContents_ = function(contents, header) {
+KeyFileParser.prototype.parseContents_ = function(contents, numGroups, numEntries) {
   var groups = [];
   var levels = [];
-  for (var curGroup = 0; curGroup < header['groups']; curGroup++) {
+  for (var curGroup = 0; curGroup < numGroups; curGroup++) {
     groups.push(this.readGroup_(contents, levels));
+  }
+  var entries = [];
+  for (var curEntry = 0; curEntry < numEntries; curEntry++) {
+    entries.push(this.readEntry_(contents));
   }
 };
 
@@ -140,6 +144,7 @@ KeyFileParser.prototype.readGroup_ = function(contents, levels) {
       case 8:
         levels.push(contents.readShort());
         break;
+
       // Unused field types
       case 0:
       case 3:
@@ -154,4 +159,65 @@ KeyFileParser.prototype.readGroup_ = function(contents, levels) {
     }
   }
   return group;
+};
+
+KeyFileParser.prototype.readEntry_ = function(contents) {
+  var entry = {};
+  var fieldType = -1;
+  while (fieldType != 65535) {
+    fieldType = contents.readShort();
+    var fieldSize = contents.readInt();
+    switch (fieldType) {
+      case 1:
+        entry['uuid'] = contents.readBytes(16);
+        break;
+      case 2:
+        entry['groupId'] = contents.readInt();
+        break;
+      case 3:
+        entry['image'] = contents.readInt();
+        break;
+      case 4:
+        entry['title'] = contents.readString();
+        break;
+      case 5:
+        entry['url'] = contents.readString();
+        break;
+      case 6:
+        entry['username'] = contents.readString();
+        break;
+      case 7:
+        entry['password'] = contents.readString();
+        break;
+      case 8:
+        entry['comment'] = contents.readString();
+        break;
+      case 9:
+        entry['creation'] = contents.readBytes(5);
+        break;
+      case 10:
+        entry['lastModified'] = contents.readBytes(5);
+        break;
+      case 11:
+        entry['lastAccessed'] = contents.readBytes(5);
+        break;
+      case 12:
+        entry['expires'] = contents.readBytes(5);
+        break;
+      case 13:
+        entry['binaryDesc'] = contents.readString();
+        break;
+      case 14:
+        entry['binary'] = contents.readBytes(fieldSize);
+        break;
+
+      // Unused field types
+      case 0:
+      case 65535:
+      default:
+        contents.readBytes(fieldSize);
+        break;
+    }
+  }
+  return entry;
 };
