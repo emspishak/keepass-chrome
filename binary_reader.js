@@ -97,3 +97,16 @@ BinaryReader.prototype.readString = function() {
   }
   return result;
 };
+
+BinaryReader.prototype.readDate = function() {
+  var bytes = this.readBytes(5);
+
+  var year = (bytes[0] << 6) | (bytes[1] >> 2);
+  var month = ((bytes[1] & 3) << 2) | (bytes[2] >> 6);
+  var day = (bytes[2] >> 1) & 31;
+  var hour = ((bytes[2] & 1) << 4) | (bytes[3] >> 4);
+  var min = ((bytes[3] & 15) << 2) | (bytes[4] >> 6);
+  var sec = bytes[4] & 63;
+
+  return new Date(year, month - 1, day, hour, min, sec);
+};

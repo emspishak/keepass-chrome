@@ -193,16 +193,16 @@ KeyFileParser.prototype.readEntry_ = function(contents) {
         entry['comment'] = contents.readString();
         break;
       case 9:
-        entry['creation'] = contents.readBytes(5);
+        entry['creation'] = contents.readDate();
         break;
       case 10:
-        entry['lastModified'] = contents.readBytes(5);
+        entry['lastModified'] = contents.readDate();
         break;
       case 11:
-        entry['lastAccessed'] = contents.readBytes(5);
+        entry['lastAccessed'] = contents.readDate();
         break;
       case 12:
-        entry['expires'] = contents.readBytes(5);
+        entry['expires'] = contents.readDate();
         break;
       case 13:
         entry['binaryDesc'] = contents.readString();
