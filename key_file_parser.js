@@ -25,7 +25,7 @@ KeyFileParser.prototype.parse = function(password) {
   }
   result['decryptedData'] = decryptedData;
   var rest = BinaryReader.fromWordArray(decryptedData);
-  this.parseContents_(rest, header['groups'], header['entries']);
+  result['rootGroup'] = this.parseContents_(rest, header['groups'], header['entries']);
   return result;
 };
 
@@ -123,23 +123,32 @@ KeyFileParser.prototype.parseContents_ = function(contents, numGroups, numEntrie
   for (var curEntry = 0; curEntry < numEntries; curEntry++) {
     entries.push(this.readEntry_(contents));
   }
+
+  var rootGroup = new Group('$ROOT$', '$ROOT$');
+  this.createGroupTree_(levels, groups, rootGroup);
+  this.assignEntriesToGroups_(entries, groups, rootGroup);
+
+  return rootGroup;
 };
 
 KeyFileParser.prototype.readGroup_ = function(contents, levels) {
-  var group = {};
+  var id = undefined;
+  var title = undefined;
+  var image = undefined;
+
   var fieldType = -1;
   while (fieldType != 65535) {
     fieldType = contents.readShort();
     var fieldSize = contents.readInt();
     switch (fieldType) {
       case 1:
-        group['id'] = contents.readInt();
+        id = contents.readInt();
         break;
       case 2:
-        group['title'] = contents.readString();
+        title = contents.readString();
         break;
       case 7:
-        group['image'] = contents.readInt();
+        image = contents.readInt();
         break;
       case 8:
         levels.push(contents.readShort());
@@ -158,7 +167,7 @@ KeyFileParser.prototype.readGroup_ = function(contents, levels) {
         break;
     }
   }
-  return group;
+  return new Group(id, title, image);
 };
 
 KeyFileParser.prototype.readEntry_ = function(contents) {
@@ -220,4 +229,47 @@ KeyFileParser.prototype.readEntry_ = function(contents) {
     }
   }
   return entry;
+};
+
+KeyFileParser.prototype.createGroupTree_ = function(levels, groups, rootGroup) {
+  for (var i = 0; i < groups.length; i++) {
+    if (levels[i] == 0) {
+      rootGroup.addChild(groups[i]);
+    } else {
+      var parentGroupIndex = this.findParentGroupIndex_(i, levels);
+      var parentGroup = (parentGroupIndex == -1) ? rootGroup : groups[parentGroupIndex];
+      parentGroup.addChild(groups[i]);
+    }
+  }
+};
+
+KeyFileParser.prototype.findParentGroupIndex_ = function(currentGroupIndex, levels) {
+  var j;
+  for (j = currentGroupIndex - 1; j >= 0; j--) {
+    if (levels[j] < levels[currentGroupIndex]) {
+      if (levels[currentGroupIndex] - levels[j] != 1) {
+        return -1;
+      } else {
+        return j;
+      }
+    }
+  }
+  return -1;
+};
+
+KeyFileParser.prototype.assignEntriesToGroups_ = function(entries, groups, rootGroup) {
+  for (var e = 0; e < entries.length; e++) {
+    var group = this.findGroup_(entries[e], groups, rootGroup);
+    group.addEntry(entries[e]);
+  }
+};
+
+KeyFileParser.prototype.findGroup_ = function(entry, groups, rootGroup) {
+  for (var g = 0; g < groups.length; g++) {
+    if (entry.groupId == groups[g].getId()) {
+      return groups[g];
+    }
+  }
+
+  return rootGroup.getChild(0);
 };
