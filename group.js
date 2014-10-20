@@ -31,8 +31,16 @@ Group.prototype.getChild = function(index) {
   return this.children[index];
 };
 
+Group.prototype.getChildren = function() {
+  return this.children;
+};
+
 Group.prototype.addEntry = function(entry) {
   entry.group = this;
   entry.index = this.entries.length;
   this.entries.push(entry);
+};
+
+Group.prototype.getEntries = function() {
+  return this.entries;
 };

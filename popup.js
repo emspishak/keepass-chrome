@@ -102,7 +102,69 @@ function processKeyFile() {
     showMasterPassword();
     return;
   }
-  console.log(file);
+  showGroups(file.rootGroup);
+}
+
+function showGroups(rootGroup) {
+  var passwords = document.getElementById('passwords');
+  passwords.style.display = 'initial';
+  var groups = document.createElement('ol');
+  for (var i = 0; i < rootGroup.getChildren().length; i++) {
+    groups.appendChild(createGroupElement(rootGroup.getChildren()[i]));
+  }
+  passwords.appendChild(groups);
+}
+
+function createGroupElement(group) {
+  var groupElement = document.createElement('li');
+  var title = document.createElement('h2');
+  title.innerHTML = group.getTitle();
+  groupElement.appendChild(title);
+  var children = document.createElement('ol');
+  for (var i = 0; i < group.getChildren().length; i++) {
+    children.appendChild(createGroupElement(group.getChildren()[i]));
+  }
+  for (var i = 0; i < group.getEntries().length; i++) {
+    var entry = group.getEntries()[i];
+    if (shouldDisplayEntry(entry)) {
+      children.appendChild(createEntryElement(entry));
+    }
+  }
+  groupElement.appendChild(children);
+  return groupElement;
+}
+
+function createEntryElement(entry) {
+  var entryElement = document.createElement('li');
+  var title = document.createElement('h3');
+  title.innerHTML = entry.title;
+  entryElement.appendChild(title);
+
+  var usernameButton = document.createElement('button');
+  usernameButton.innerHTML = 'Copy username';
+  usernameButton.onclick = function() {
+    console.log(entry.username);
+  };
+  entryElement.appendChild(usernameButton);
+
+  var passwordButton = document.createElement('button');
+  passwordButton.innerHTML = 'Copy password';
+  passwordButton.onclick = function() {
+    console.log(entry.password);
+  };
+  entryElement.appendChild(passwordButton);
+
+  return entryElement;
+}
+
+function shouldDisplayEntry(entry) {
+  return typeof entry.binary === 'undefined'
+    || typeof entry.comment === 'undefined' || entry.comment === ''
+    || entry.binaryDesc != 'bin-stream'
+    || entry.title != 'Meta-Info'
+    || entry.username != "SYSTEM"
+    || entry.url != '$'
+    || entry.image != 0;
 }
 
 function showLoading(message) {
