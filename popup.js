@@ -1,53 +1,60 @@
-var API_BASE = 'https://www.googleapis.com/drive/v2';
+document.addEventListener('DOMContentLoaded', function() {
+  new Popup().start();
+});
 
-document.addEventListener('DOMContentLoaded', main);
+Popup = function() {};
+Popup.API_BASE = 'https://www.googleapis.com/drive/v2';
 
-function main() {
-  onEnter('key-file-name', searchForKeyFile);
-  document.getElementById('key-file-search').addEventListener('click', searchForKeyFile);
-}
+Popup.prototype.start = function() {
+  this.onEnter_('key-file-name', this.searchForKeyFile_.bind(this));
+  document.getElementById('key-file-search').addEventListener('click', this.searchForKeyFile_.bind(this));
+};
 
-function showError(message) {
+Popup.prototype.showError_ = function(message) {
   document.getElementById('error').textContent = message;
-}
+};
 
-function hideError() {
+Popup.prototype.hideError_ = function() {
   document.getElementById('error').innerHTML = '';
-}
+};
 
-function checkError() {
+Popup.prototype.checkError_ = function() {
   if (chrome.runtime.lastError) {
-    showError(chrome.runtime.lastError.message);
+    this.showError_(chrome.runtime.lastError.message);
   }
   return !!chrome.runtime.lastError;
-}
+};
 
-function searchForKeyFile() {
+Popup.prototype.searchForKeyFile_ = function() {
   var query = document.getElementById('key-file-name').value;
   var encodedQuery = encodeURIComponent(query).replace("'", "\\'");
   document.getElementById('files').innerHTML = '';
-  showLoading("Searching Drive...");
-  sendXhr('GET', API_BASE + '/files?q=title+=+\'' + encodedQuery + '\'', displayFiles);
-}
+  this.showLoading_('Searching Drive...');
+  this.sendXhr_('GET', Popup.API_BASE + '/files?q=title+=+\'' + encodedQuery + '\'', this.displayFiles_.bind(this));
+};
 
-function sendXhr(method, url, callback, opt_responseType) {
-  chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
-    if (checkError()) {
-      return;
-    }
-    var xhr = new XMLHttpRequest();
-    xhr.open(method, url);
-    if (opt_responseType) {
-      xhr.responseType = opt_responseType;
-    }
-    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-    xhr.onload = callback;
-    xhr.send();
-  });
-}
+Popup.prototype.sendXhr_ = function(method, url, callback, opt_responseType) {
+  chrome.identity.getAuthToken({ 'interactive': true }, this.getAuthTokenCallback_.bind(this, method, url, callback, opt_responseType));
+};
 
-function displayFiles() {
-  var files = JSON.parse(this.responseText);
+Popup.prototype.getAuthTokenCallback_ = function(method, url, callback, opt_responseType, token) {
+  if (this.checkError_()) {
+    return;
+  }
+  var xhr = new XMLHttpRequest();
+  xhr.open(method, url);
+  if (opt_responseType) {
+    xhr.responseType = opt_responseType;
+  }
+  xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+  xhr.onload = function() {
+    callback(this);
+  };
+  xhr.send();
+};
+
+Popup.prototype.displayFiles_ = function(request) {
+  var files = JSON.parse(request.responseText);
   var ul = document.getElementById('files');
   ul.innerHTML = '';
   if (files.items.length) {
@@ -55,7 +62,7 @@ function displayFiles() {
       var file = files.items[i];
       var li = document.createElement('li');
       li.textContent = file.title;
-      li.addEventListener('click', handleKeyFileClick.bind(undefined, file.id));
+      li.addEventListener('click', this.handleKeyFileClick_.bind(this, file.id));
       ul.appendChild(li);
     }
   } else {
@@ -63,78 +70,78 @@ function displayFiles() {
     li.textContent = 'No results';
     ul.appendChild(li);
   }
-  hideLoading();
-}
+  this.hideLoading_();
+};
 
-function handleKeyFileClick(keyFileId) {
+Popup.prototype.handleKeyFileClick_ = function(keyFileId) {
   if (!keyFileId) {
-    showError('No key file ID');
+    this.showError_('No key file ID');
     return;
   }
   document.getElementById('key-file-select').style.display = 'none';
-  var callback = handleMasterPasswordOkClick.bind(undefined, keyFileId);
-  onEnter('master-password', callback);
+  var callback = this.handleMasterPasswordOkClick_.bind(this, keyFileId);
+  this.onEnter_('master-password', callback);
   document.getElementById('master-password-ok').addEventListener('click', callback);
-  showMasterPassword();
-}
+  this.showMasterPassword_();
+};
 
-function handleMasterPasswordOkClick(keyFileId) {
+Popup.prototype.handleMasterPasswordOkClick_ = function(keyFileId) {
   // If the 'invalid password' error is shown.
-  hideError();
+  this.hideError_();
   document.getElementById('master-password-enter').style.display = 'none';
-  showLoading('Getting key file...');
-  sendXhr('GET', API_BASE + '/files/' + keyFileId, fetchKeyFile);
-}
+  this.showLoading_('Getting key file...');
+  this.sendXhr_('GET', Popup.API_BASE + '/files/' + keyFileId, this.fetchKeyFile_.bind(this));
+};
 
-function fetchKeyFile() {
-  var file = JSON.parse(this.responseText);
+Popup.prototype.fetchKeyFile_ = function(request) {
+  var file = JSON.parse(request.responseText);
   var downloadUrl = file['downloadUrl'];
-  sendXhr('GET', downloadUrl, processKeyFile, 'arraybuffer');
-}
+  this.sendXhr_('GET', downloadUrl, this.processKeyFile_.bind(this), 'arraybuffer');
+};
 
-function processKeyFile() {
-  showLoading('Processing key file...');
+Popup.prototype.processKeyFile_ = function(request) {
+  this.showLoading_('Processing key file...');
   var password = document.getElementById('master-password').value;
-  var file = new KeyFileParser(this.response).parse(password);
-  hideLoading();
+  var file = new KeyFileParser(request.response).parse(password);
+  this.hideLoading_();
   if (file['error']) {
-    showError(file['error']);
-    showMasterPassword();
+    this.showError_(file['error']);
+    this.showMasterPassword_();
     return;
   }
-  showGroups(file.rootGroup);
-}
+  this.showGroups_(file.rootGroup);
+};
 
-function showGroups(rootGroup) {
+Popup.prototype.showGroups_ = function(rootGroup) {
   var passwords = document.getElementById('passwords');
   passwords.style.display = 'initial';
   var groups = document.createElement('ol');
   for (var i = 0; i < rootGroup.getChildren().length; i++) {
-    groups.appendChild(createGroupElement(rootGroup.getChildren()[i]));
+    groups.appendChild(this.createGroupElement_(rootGroup.getChildren()[i]));
   }
   passwords.appendChild(groups);
-}
+};
 
-function createGroupElement(group) {
+Popup.prototype.createGroupElement_ = function(group) {
   var groupElement = document.createElement('li');
   var title = document.createElement('h2');
   title.innerHTML = group.getTitle();
   groupElement.appendChild(title);
   var children = document.createElement('ol');
   for (var i = 0; i < group.getChildren().length; i++) {
-    children.appendChild(createGroupElement(group.getChildren()[i]));
+    children.appendChild(this.createGroupElement_(group.getChildren()[i]));
   }
   for (var i = 0; i < group.getEntries().length; i++) {
     var entry = group.getEntries()[i];
-    if (shouldDisplayEntry(entry)) {
-      children.appendChild(createEntryElement(entry));
+    if (this.shouldDisplayEntry_(entry)) {
+      children.appendChild(this.createEntryElement_(entry));
     }
   }
   groupElement.appendChild(children);
   return groupElement;
-}
+};
 
-function createEntryElement(entry) {
+Popup.prototype.createEntryElement_ = function(entry) {
   var entryElement = document.createElement('li');
   var title = document.createElement('h3');
   title.innerHTML = entry.title;
@@ -155,36 +162,36 @@ function createEntryElement(entry) {
   entryElement.appendChild(passwordButton);
 
   return entryElement;
-}
+};
 
-function shouldDisplayEntry(entry) {
+Popup.prototype.shouldDisplayEntry_ = function(entry) {
   return typeof entry.binary === 'undefined'
     || typeof entry.comment === 'undefined' || entry.comment === ''
     || entry.binaryDesc != 'bin-stream'
     || entry.title != 'Meta-Info'
-    || entry.username != "SYSTEM"
+    || entry.username != 'SYSTEM'
     || entry.url != '$'
     || entry.image != 0;
-}
+};
 
-function showLoading(message) {
+Popup.prototype.showLoading_ = function(message) {
   document.getElementById('loading-message').textContent = message;
   document.getElementById('loading').style.display = 'initial';
-}
+};
 
-function hideLoading() {
+Popup.prototype.hideLoading_ = function() {
   document.getElementById('loading').style.display = 'none';
-}
+};
 
-function showMasterPassword() {
+Popup.prototype.showMasterPassword_ = function() {
   document.getElementById('master-password-enter').style.display = 'initial';
   document.getElementById('master-password').focus();
-}
+};
 
-function onEnter(id, callback) {
+Popup.prototype.onEnter_ = function(id, callback) {
   document.getElementById(id).addEventListener('keyup', function(event) {
     if (event.keyCode == 13) {
       callback();
     }
   });
-}
+};
