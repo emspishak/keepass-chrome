@@ -2,17 +2,19 @@
  * Manages the UI of the KeePass Chrome extension.
  */
 
+var keepasschrome = {};
+
 document.addEventListener('DOMContentLoaded', function() {
-  new Popup().start();
+  new keepasschrome.Popup().start();
 });
 
 /**
  * @constructor
  */
-Popup = function() {};
-Popup.API_BASE = 'https://www.googleapis.com/drive/v2';
+keepasschrome.Popup = function() {};
+keepasschrome.Popup.API_BASE = 'https://www.googleapis.com/drive/v2';
 
-Popup.prototype.start = function() {
+keepasschrome.Popup.prototype.start = function() {
   this.onEnter_('key-file-name', this.searchForKeyFile_.bind(this));
   document.getElementById('key-file-search').addEventListener('click', this.searchForKeyFile_.bind(this));
 };
@@ -22,7 +24,7 @@ Popup.prototype.start = function() {
  * @param {!string} message The error message to show.
  * @private
  */
-Popup.prototype.showError_ = function(message) {
+keepasschrome.Popup.prototype.showError_ = function(message) {
   document.getElementById('error').textContent = message;
 };
 
@@ -30,7 +32,7 @@ Popup.prototype.showError_ = function(message) {
 /**
  * @private
  */
-Popup.prototype.hideError_ = function() {
+keepasschrome.Popup.prototype.hideError_ = function() {
   document.getElementById('error').innerHTML = '';
 };
 
@@ -40,7 +42,7 @@ Popup.prototype.hideError_ = function() {
  * @return {!boolean} True if the last API call resulted in an error, false otherwise.
  * @private
  */
-Popup.prototype.checkError_ = function() {
+keepasschrome.Popup.prototype.checkError_ = function() {
   if (chrome.runtime.lastError) {
     this.showError_(chrome.runtime.lastError.message);
   }
@@ -52,12 +54,12 @@ Popup.prototype.checkError_ = function() {
  * Queries Drive for a keyfile with a name matching what the user typed in.
  * @private
  */
-Popup.prototype.searchForKeyFile_ = function() {
+keepasschrome.Popup.prototype.searchForKeyFile_ = function() {
   var query = document.getElementById('key-file-name').value;
   var encodedQuery = encodeURIComponent(query).replace("'", "\\'");
   document.getElementById('files').innerHTML = '';
   this.showLoading_('Searching Drive...');
-  this.sendXhr_('GET', Popup.API_BASE + '/files?q=title+=+\'' + encodedQuery + '\'', this.displayFiles_.bind(this));
+  this.sendXhr_('GET', keepasschrome.Popup.API_BASE + '/files?q=title+=+\'' + encodedQuery + '\'', this.displayFiles_.bind(this));
 };
 
 
@@ -69,7 +71,7 @@ Popup.prototype.searchForKeyFile_ = function() {
  * @param {string=} opt_responseType The type of the response property, defaults to string.
  * @private
  */
-Popup.prototype.sendXhr_ = function(method, url, callback, opt_responseType) {
+keepasschrome.Popup.prototype.sendXhr_ = function(method, url, callback, opt_responseType) {
   chrome.identity.getAuthToken({ 'interactive': true }, this.getAuthTokenCallback_.bind(this, method, url, callback, opt_responseType));
 };
 
@@ -82,7 +84,7 @@ Popup.prototype.sendXhr_ = function(method, url, callback, opt_responseType) {
  * @param {string|undefined} responseType The type of the response property, defaults to string.
  * @param {string=} token The authentication token.
  */
-Popup.prototype.getAuthTokenCallback_ = function(method, url, callback, responseType, token) {
+keepasschrome.Popup.prototype.getAuthTokenCallback_ = function(method, url, callback, responseType, token) {
   if (this.checkError_()) {
     return;
   }
@@ -104,7 +106,7 @@ Popup.prototype.getAuthTokenCallback_ = function(method, url, callback, response
  * @param {!XMLHttpRequest} request The XMLHttpRequest of the request to search for the keyfile.
  * @private
  */
-Popup.prototype.displayFiles_ = function(request) {
+keepasschrome.Popup.prototype.displayFiles_ = function(request) {
   var files = JSON.parse(request.responseText);
   var ul = document.getElementById('files');
   ul.innerHTML = '';
@@ -130,7 +132,7 @@ Popup.prototype.displayFiles_ = function(request) {
  * @param {string=} opt_keyFileId The ID of the keyfile.
  * @private
  */
-Popup.prototype.handleKeyFileClick_ = function(opt_keyFileId) {
+keepasschrome.Popup.prototype.handleKeyFileClick_ = function(opt_keyFileId) {
   if (!opt_keyFileId) {
     this.showError_('No key file ID');
     return;
@@ -148,12 +150,12 @@ Popup.prototype.handleKeyFileClick_ = function(opt_keyFileId) {
  * @param {!string} keyFileId The ID of the keyfile.
  * @private
  */
-Popup.prototype.handleMasterPasswordOkClick_ = function(keyFileId) {
+keepasschrome.Popup.prototype.handleMasterPasswordOkClick_ = function(keyFileId) {
   // If the 'invalid password' error is shown.
   this.hideError_();
   document.getElementById('master-password-enter').style.display = 'none';
   this.showLoading_('Getting key file...');
-  this.sendXhr_('GET', Popup.API_BASE + '/files/' + keyFileId, this.fetchKeyFile_.bind(this));
+  this.sendXhr_('GET', keepasschrome.Popup.API_BASE + '/files/' + keyFileId, this.fetchKeyFile_.bind(this));
 };
 
 
@@ -162,7 +164,7 @@ Popup.prototype.handleMasterPasswordOkClick_ = function(keyFileId) {
  * @param {!XMLHttpRequest} request The XMLHttpRequest of the request to get the key file metadata.
  * @private
  */
-Popup.prototype.fetchKeyFile_ = function(request) {
+keepasschrome.Popup.prototype.fetchKeyFile_ = function(request) {
   var file = JSON.parse(request.responseText);
   var downloadUrl = file['downloadUrl'];
   this.sendXhr_('GET', downloadUrl, this.processKeyFile_.bind(this), 'arraybuffer');
@@ -174,10 +176,10 @@ Popup.prototype.fetchKeyFile_ = function(request) {
  * @param {!XMLHttpRequest} request The XMLHttpRequest of the request with the keyfile contents.
  * @private
  */
-Popup.prototype.processKeyFile_ = function(request) {
+keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
   this.showLoading_('Processing key file...');
   var password = document.getElementById('master-password').value;
-  var file = new KeyFileParser(request.response).parse(password);
+  var file = new keepasschrome.KeyFileParser(request.response).parse(password);
   this.hideLoading_();
   if (file['error']) {
     this.showError_(file['error']);
@@ -193,7 +195,7 @@ Popup.prototype.processKeyFile_ = function(request) {
  * @param {!Group} rootGroup The topmost group.
  * @private
  */
-Popup.prototype.showGroups_ = function(rootGroup) {
+keepasschrome.Popup.prototype.showGroups_ = function(rootGroup) {
   var passwords = document.getElementById('passwords');
   passwords.style.display = 'initial';
   var groups = document.createElement('ol');
@@ -210,7 +212,7 @@ Popup.prototype.showGroups_ = function(rootGroup) {
  * @return {!Element} The element.
  * @private
  */
-Popup.prototype.createGroupElement_ = function(group) {
+keepasschrome.Popup.prototype.createGroupElement_ = function(group) {
   var groupElement = document.createElement('li');
   var title = document.createElement('h2');
   title.innerHTML = group.getTitle();
@@ -236,7 +238,7 @@ Popup.prototype.createGroupElement_ = function(group) {
  * @return {!Element} The element.
  * @private
  */
-Popup.prototype.createEntryElement_ = function(entry) {
+keepasschrome.Popup.prototype.createEntryElement_ = function(entry) {
   var entryElement = document.createElement('li');
   var title = document.createElement('h3');
   title.innerHTML = entry.title;
@@ -266,7 +268,7 @@ Popup.prototype.createEntryElement_ = function(entry) {
  * @return {boolean} True if the entry should be displayed, false otherwise.
  * @private
  */
-Popup.prototype.shouldDisplayEntry_ = function(entry) {
+keepasschrome.Popup.prototype.shouldDisplayEntry_ = function(entry) {
   return typeof entry.binary === 'undefined'
     || typeof entry.comment === 'undefined' || entry.comment === ''
     || entry.binaryDesc != 'bin-stream'
@@ -282,7 +284,7 @@ Popup.prototype.shouldDisplayEntry_ = function(entry) {
  * @param {!string} message The loading message to display.
  * @private
  */
-Popup.prototype.showLoading_ = function(message) {
+keepasschrome.Popup.prototype.showLoading_ = function(message) {
   document.getElementById('loading-message').textContent = message;
   document.getElementById('loading').style.display = 'initial';
 };
@@ -292,7 +294,7 @@ Popup.prototype.showLoading_ = function(message) {
  * Hides the loading screen.
  * @private
  */
-Popup.prototype.hideLoading_ = function() {
+keepasschrome.Popup.prototype.hideLoading_ = function() {
   document.getElementById('loading').style.display = 'none';
 };
 
@@ -301,7 +303,7 @@ Popup.prototype.hideLoading_ = function() {
  * Shows the master password screen.
  * @private
  */
-Popup.prototype.showMasterPassword_ = function() {
+keepasschrome.Popup.prototype.showMasterPassword_ = function() {
   document.getElementById('master-password-enter').style.display = 'initial';
   document.getElementById('master-password').focus();
 };
@@ -313,7 +315,7 @@ Popup.prototype.showMasterPassword_ = function() {
  * @param {function()} callback The callback.
  * @private
  */
-Popup.prototype.onEnter_ = function(id, callback) {
+keepasschrome.Popup.prototype.onEnter_ = function(id, callback) {
   document.getElementById(id).addEventListener('keyup', function(event) {
     if (event.keyCode == 13) {
       callback();

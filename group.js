@@ -4,7 +4,7 @@
  * @param {!string} image The group's image.
  * @constructor
  */
-Group = function(id, title, image) {
+keepasschrome.Group = function(id, title, image) {
 
   /**
    * @type {!string}
@@ -46,7 +46,7 @@ Group = function(id, title, image) {
 /**
  * @return {string} The ID.
  */
-Group.prototype.getId = function() {
+keepasschrome.Group.prototype.getId = function() {
   return this.id;
 };
 
@@ -54,7 +54,7 @@ Group.prototype.getId = function() {
 /**
  * @return {string} The title.
  */
-Group.prototype.getTitle = function() {
+keepasschrome.Group.prototype.getTitle = function() {
   return this.title;
 };
 
@@ -62,7 +62,7 @@ Group.prototype.getTitle = function() {
 /**
  * @return {string} The image.
  */
-Group.prototype.getImage = function() {
+keepasschrome.Group.prototype.getImage = function() {
   return this.image;
 };
 
@@ -70,7 +70,7 @@ Group.prototype.getImage = function() {
 /**
  * @param {!Group} child The child to add.
  */
-Group.prototype.addChild = function(child) {
+keepasschrome.Group.prototype.addChild = function(child) {
   child.parent = this;
   child.index = this.children.length;
   this.children.push(child);
@@ -81,7 +81,7 @@ Group.prototype.addChild = function(child) {
  * @param {number} index The index of the child to get.
  * @return {Group} The child group at the given index.
  */
-Group.prototype.getChild = function(index) {
+keepasschrome.Group.prototype.getChild = function(index) {
   return this.children[index];
 };
 
@@ -89,7 +89,7 @@ Group.prototype.getChild = function(index) {
 /**
  * @return {Array.<Group>} The child groups.
  */
-Group.prototype.getChildren = function() {
+keepasschrome.Group.prototype.getChildren = function() {
   return this.children;
 };
 
@@ -97,7 +97,7 @@ Group.prototype.getChildren = function() {
 /**
  * @param {!Object} entry The entry to add.
  */
-Group.prototype.addEntry = function(entry) {
+keepasschrome.Group.prototype.addEntry = function(entry) {
   entry.group = this;
   entry.index = this.entries.length;
   this.entries.push(entry);
@@ -107,6 +107,6 @@ Group.prototype.addEntry = function(entry) {
 /**
  * @return {Array.<entry>} The entries.
  */
-Group.prototype.getEntries = function() {
+keepasschrome.Group.prototype.getEntries = function() {
   return this.entries;
 };

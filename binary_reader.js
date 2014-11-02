@@ -7,7 +7,7 @@
  * @param {number=} opt_length The length of the data, uses the ArrayBuffers byte length if this isn't specified.
  * @constructor
  */
-BinaryReader = function(arraybuffer, opt_length) {
+keepasschrome.BinaryReader = function(arraybuffer, opt_length) {
   this.data_ = new Uint8Array(arraybuffer);
   this.length_ = opt_length || arraybuffer.byteLength;
   this.pos_ = 0;
@@ -19,7 +19,7 @@ BinaryReader = function(arraybuffer, opt_length) {
  * @param {!WordArray} wordArray The WordArray.
  * @return {BinaryReader} A new BinaryReader.
  */
-BinaryReader.fromWordArray = function(wordArray) {
+keepasschrome.BinaryReader.fromWordArray = function(wordArray) {
   var length = Math.ceil(wordArray.sigBytes / Uint32Array.BYTES_PER_ELEMENT) *
                    Uint32Array.BYTES_PER_ELEMENT;
   var buf = new ArrayBuffer(length);
@@ -31,14 +31,14 @@ BinaryReader.fromWordArray = function(wordArray) {
            | ((val >> 8) & 0xFF00)
            | ((val >> 24) & 0xFF);
   }));
-  return new BinaryReader(buf, wordArray.sigBytes);
+  return new keepasschrome.BinaryReader(buf, wordArray.sigBytes);
 };
 
 
 /**
  * @return {boolean} True if there's at least one more byte.
  */
-BinaryReader.prototype.hasNextByte = function() {
+keepasschrome.BinaryReader.prototype.hasNextByte = function() {
   return this.pos_ < this.length_;
 };
 
@@ -46,7 +46,7 @@ BinaryReader.prototype.hasNextByte = function() {
 /**
  * @return {boolean} True if there's at least one more int.
  */
-BinaryReader.prototype.hasNextInt = function() {
+keepasschrome.BinaryReader.prototype.hasNextInt = function() {
   return this.pos_ < this.length_ - 3;
 };
 
@@ -54,7 +54,7 @@ BinaryReader.prototype.hasNextInt = function() {
 /**
  * @return {number} The next byte.
  */
-BinaryReader.prototype.readByte = function() {
+keepasschrome.BinaryReader.prototype.readByte = function() {
   if (!this.hasNextByte()) {
     throw new RangeError();
   }
@@ -63,10 +63,10 @@ BinaryReader.prototype.readByte = function() {
 
 
 /**
- * @param {!number} The number of bytes to read.
+ * @param {!number} num The number of bytes to read.
  * @return {Array.<number>} The bytes.
  */
-BinaryReader.prototype.readBytes = function(num) {
+keepasschrome.BinaryReader.prototype.readBytes = function(num) {
   var bytes = [];
   for (var i = 0; i < num; i++) {
     bytes.push(this.readByte());
@@ -76,11 +76,11 @@ BinaryReader.prototype.readBytes = function(num) {
 
 
 /**
- * @param {!number} The numbers of bytes to read.
+ * @param {!number} numBytes The numbers of bytes to read.
  * @return {number} The number.
  * @private
  */
-BinaryReader.prototype.readNumber_ = function(numBytes) {
+keepasschrome.BinaryReader.prototype.readNumber_ = function(numBytes) {
   var bytes = this.readBytes(numBytes);
   var result = 0;
   for (var i = bytes.length - 1; i >= 0; i--) {
@@ -93,7 +93,7 @@ BinaryReader.prototype.readNumber_ = function(numBytes) {
 /**
  * @return {number} The short.
  */
-BinaryReader.prototype.readShort = function() {
+keepasschrome.BinaryReader.prototype.readShort = function() {
   return this.readNumber_(2);
 };
 
@@ -101,7 +101,7 @@ BinaryReader.prototype.readShort = function() {
 /**
  * @return {number} The int.
  */
-BinaryReader.prototype.readInt = function() {
+keepasschrome.BinaryReader.prototype.readInt = function() {
   return this.readNumber_(4);
 };
 
@@ -109,7 +109,7 @@ BinaryReader.prototype.readInt = function() {
 /**
  * @return {number} The word.
  */
-BinaryReader.prototype.readWord = function() {
+keepasschrome.BinaryReader.prototype.readWord = function() {
   var bytes = this.readBytes(4);
   var result = 0;
   for (var i = 0; i < bytes.length; i++) {
@@ -123,7 +123,7 @@ BinaryReader.prototype.readWord = function() {
  * @param {!number} num The number of bytes to read.
  * @return {WordArray} The bytes.
  */
-BinaryReader.prototype.readWordArray = function(num) {
+keepasschrome.BinaryReader.prototype.readWordArray = function(num) {
   var words = [];
   while (num > 0) {
     words.push(this.readWord());
@@ -136,7 +136,7 @@ BinaryReader.prototype.readWordArray = function(num) {
 /**
  * @return {WordArray} The bytes.
  */
-BinaryReader.prototype.readRestToWordArray = function() {
+keepasschrome.BinaryReader.prototype.readRestToWordArray = function() {
   var restOfFile = [];
   var numBytes = 0;
   while (this.hasNextInt()) {
@@ -151,7 +151,7 @@ BinaryReader.prototype.readRestToWordArray = function() {
  * Reads in a null-terminated string.
  * @return {string} The string;
  */
-BinaryReader.prototype.readString = function() {
+keepasschrome.BinaryReader.prototype.readString = function() {
   var result = '';
   var b = this.readByte();
   while (b != 0) {
@@ -165,7 +165,7 @@ BinaryReader.prototype.readString = function() {
 /**
  * @return {Date} The date.
  */
-BinaryReader.prototype.readDate = function() {
+keepasschrome.BinaryReader.prototype.readDate = function() {
   var bytes = this.readBytes(5);
 
   var year = (bytes[0] << 6) | (bytes[1] >> 2);
