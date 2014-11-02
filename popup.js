@@ -185,14 +185,17 @@ keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
     this.showMasterPassword_();
     return;
   }
-  var file = new keepasschrome.KeyFileParser(response).parse(password);
-  this.hideLoading_();
-  if (file['error']) {
-    this.showError_(file['error']);
+  var rootGroup;
+  try {
+    rootGroup = new keepasschrome.KeyFileParser(response).parse(password);
+  } catch (e) {
+    this.showError_(e.message);
     this.showMasterPassword_();
     return;
+  } finally {
+    this.hideLoading_();
   }
-  this.showGroups_(file.rootGroup);
+  this.showGroups_(rootGroup);
 };
 
 

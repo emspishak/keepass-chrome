@@ -23,30 +23,19 @@ keepasschrome.KeyFileParser = function(arraybuffer) {
 /**
  * Parses the keyfile with the given password.
  * @param {!string} password The password to decrypt the keyfile.
- * @return {!Object} the parsed keyfile contents.
+ * @return {!keepasschrome.Group} The top group of the keyfile.
  */
 keepasschrome.KeyFileParser.prototype.parse = function(password) {
-  var result = {};
   var header = this.parseHeader_();
-  result['header'] = header;
   if (!this.verifyVersion_(header)) {
-    result['error'] = 'Invalid key file version';
-    return result;
+    throw new Error('Invalid key file version');
   }
   var encryptedData = this.bytes_.readRestToWordArray();
   var key = this.transformKey_(password, header.masterSeed, header.masterSeed2,
       header.keyEncryptionRounds);
-  var decryptedData;
-  try {
-    decryptedData = this.decryptFile_(header.flags, encryptedData, key, header.encryptionInitialValue, header.contentsHash);
-  } catch (e) {
-    result['error'] = e.message;
-    return result;
-  }
-  result['decryptedData'] = decryptedData;
+  var decryptedData = this.decryptFile_(header.flags, encryptedData, key, header.encryptionInitialValue, header.contentsHash);
   var rest = keepasschrome.BinaryReader.fromWordArray(decryptedData);
-  result['rootGroup'] = this.parseContents_(rest, header.groups, header.entries);
-  return result;
+  return this.parseContents_(rest, header.groups, header.entries);
 };
 
 
