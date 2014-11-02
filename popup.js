@@ -67,7 +67,7 @@ keepasschrome.Popup.prototype.searchForKeyFile_ = function() {
  * Sends an authenticated XHR.
  * @param {!string} method The HTTP method to use (GET, POST, etc.).
  * @param {!string} url The URL to send the request to.
- * @param {!function(XMLHttpRequest)} callback The function to call when the request is complete.
+ * @param {!function(!XMLHttpRequest)} callback The function to call when the request is complete.
  * @param {string=} opt_responseType The type of the response property, defaults to string.
  * @private
  */
@@ -80,7 +80,7 @@ keepasschrome.Popup.prototype.sendXhr_ = function(method, url, callback, opt_res
  * Sends an XHR with the given authentication token.
  * @param {!string} method The HTTP method to use (GET, POST, etc.).
  * @param {!string} url The URL to send the request to.
- * @param {!function(XMLHttpRequest)} callback The function to call when the request is complete.
+ * @param {!function(!XMLHttpRequest)} callback The function to call when the request is complete.
  * @param {string|undefined} responseType The type of the response property, defaults to string.
  * @param {string=} token The authentication token.
  */
@@ -192,7 +192,7 @@ keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
 
 /**
  * Displays the keyfile.
- * @param {!Group} rootGroup The topmost group.
+ * @param {!keepasschrome.Group} rootGroup The topmost group.
  * @private
  */
 keepasschrome.Popup.prototype.showGroups_ = function(rootGroup) {
@@ -208,7 +208,7 @@ keepasschrome.Popup.prototype.showGroups_ = function(rootGroup) {
 
 /**
  * Creates a group element to display on the page.
- * @param {!Group} group The group to create the element for.
+ * @param {!keepasschrome.Group} group The group to create the element for.
  * @return {!Element} The element.
  * @private
  */
@@ -234,7 +234,7 @@ keepasschrome.Popup.prototype.createGroupElement_ = function(group) {
 
 /**
  * Creates an entry element to display on the page.
- * @param {!Object.<string, string>} entry The entry to create the element for.
+ * @param {!Object.<!string, !string>} entry The entry to create the element for.
  * @return {!Element} The element.
  * @private
  */
@@ -264,8 +264,8 @@ keepasschrome.Popup.prototype.createEntryElement_ = function(entry) {
 
 /**
  * Determines if the given entry should be displayed.
- * @param {!Object.<string, string>} entry The entry.
- * @return {boolean} True if the entry should be displayed, false otherwise.
+ * @param {!Object.<!string, !string>} entry The entry.
+ * @return {!boolean} True if the entry should be displayed, false otherwise.
  * @private
  */
 keepasschrome.Popup.prototype.shouldDisplayEntry_ = function(entry) {
@@ -312,7 +312,7 @@ keepasschrome.Popup.prototype.showMasterPassword_ = function() {
 /**
  * Sets the element with the given ID to call the given callback when the user presses enter.
  * @param {!string} id The ID to set the callback on.
- * @param {function()} callback The callback.
+ * @param {!function()} callback The callback.
  * @private
  */
 keepasschrome.Popup.prototype.onEnter_ = function(id, callback) {

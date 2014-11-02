@@ -3,15 +3,15 @@
  */
 
 /**
- * @param {!string} id The group's ID.
+ * @param {!number} id The group's ID.
  * @param {!string} title The title of the group.
- * @param {!string} image The group's image.
+ * @param {!number} image The group's image.
  * @constructor
  */
 keepasschrome.Group = function(id, title, image) {
 
   /**
-   * @type {!string}
+   * @type {!number}
    */
   this.id = id;
 
@@ -21,34 +21,34 @@ keepasschrome.Group = function(id, title, image) {
   this.title = title;
 
   /**
-   * @type {!string}
+   * @type {!number}
    */
   this.image = image;
 
   /**
-   * @type {?Group}
+   * @type {?keepasschrome.Group}
    */
   this.parent = null;
 
   /**
-   * @type {number}
+   * @type {!number}
    */
   this.index = -1;
 
   /**
-   * @type {Array.<Group>}
+   * @type {!Array.<!keepasschrome.Group>}
    */
   this.children = [];
 
   /**
-   * @type {Array.<Object>}
+   * @type {!Array.<!Object>}
    */
   this.entries = [];
 };
 
 
 /**
- * @return {string} The ID.
+ * @return {!number} The ID.
  */
 keepasschrome.Group.prototype.getId = function() {
   return this.id;
@@ -56,7 +56,7 @@ keepasschrome.Group.prototype.getId = function() {
 
 
 /**
- * @return {string} The title.
+ * @return {!string} The title.
  */
 keepasschrome.Group.prototype.getTitle = function() {
   return this.title;
@@ -64,7 +64,7 @@ keepasschrome.Group.prototype.getTitle = function() {
 
 
 /**
- * @return {string} The image.
+ * @return {!number} The image.
  */
 keepasschrome.Group.prototype.getImage = function() {
   return this.image;
@@ -72,7 +72,7 @@ keepasschrome.Group.prototype.getImage = function() {
 
 
 /**
- * @param {!Group} child The child to add.
+ * @param {!keepasschrome.Group} child The child to add.
  */
 keepasschrome.Group.prototype.addChild = function(child) {
   child.parent = this;
@@ -82,8 +82,8 @@ keepasschrome.Group.prototype.addChild = function(child) {
 
 
 /**
- * @param {number} index The index of the child to get.
- * @return {Group} The child group at the given index.
+ * @param {!number} index The index of the child to get.
+ * @return {!keepasschrome.Group} The child group at the given index.
  */
 keepasschrome.Group.prototype.getChild = function(index) {
   return this.children[index];
@@ -91,7 +91,7 @@ keepasschrome.Group.prototype.getChild = function(index) {
 
 
 /**
- * @return {Array.<Group>} The child groups.
+ * @return {!Array.<!keepasschrome.Group>} The child groups.
  */
 keepasschrome.Group.prototype.getChildren = function() {
   return this.children;
@@ -109,7 +109,7 @@ keepasschrome.Group.prototype.addEntry = function(entry) {
 
 
 /**
- * @return {Array.<entry>} The entries.
+ * @return {!Array.<!Object>} The entries.
  */
 keepasschrome.Group.prototype.getEntries = function() {
   return this.entries;
