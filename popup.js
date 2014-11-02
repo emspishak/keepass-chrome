@@ -44,7 +44,7 @@ keepasschrome.Popup.prototype.hideError_ = function() {
  */
 keepasschrome.Popup.prototype.checkError_ = function() {
   if (chrome.runtime.lastError) {
-    this.showError_(chrome.runtime.lastError.message);
+    this.showError_(chrome.runtime.lastError.message || 'Unknown error.');
   }
   return !!chrome.runtime.lastError;
 };
