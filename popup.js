@@ -179,7 +179,13 @@ keepasschrome.Popup.prototype.fetchKeyFile_ = function(request) {
 keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
   this.showLoading_('Processing key file...');
   var password = document.getElementById('master-password').value;
-  var file = new keepasschrome.KeyFileParser(request.response).parse(password);
+  var response = request.response;
+  if (!(response instanceof ArrayBuffer)) {
+    this.showError_('XHR response expected to be ArrayBuffer but got ' + response.toString());
+    this.showMasterPassword_();
+    return;
+  }
+  var file = new keepasschrome.KeyFileParser(response).parse(password);
   this.hideLoading_();
   if (file['error']) {
     this.showError_(file['error']);
