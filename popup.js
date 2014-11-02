@@ -88,8 +88,8 @@ Popup.prototype.getAuthTokenCallback_ = function(method, url, callback, response
   }
   var xhr = new XMLHttpRequest();
   xhr.open(method, url);
-  if (opt_responseType) {
-    xhr.responseType = opt_responseType;
+  if (responseType) {
+    xhr.responseType = responseType;
   }
   xhr.setRequestHeader('Authorization', 'Bearer ' + token);
   xhr.onload = function() {
@@ -131,12 +131,12 @@ Popup.prototype.displayFiles_ = function(request) {
  * @private
  */
 Popup.prototype.handleKeyFileClick_ = function(opt_keyFileId) {
-  if (!keyFileId) {
+  if (!opt_keyFileId) {
     this.showError_('No key file ID');
     return;
   }
   document.getElementById('key-file-select').style.display = 'none';
-  var callback = this.handleMasterPasswordOkClick_.bind(this, keyFileId);
+  var callback = this.handleMasterPasswordOkClick_.bind(this, opt_keyFileId);
   this.onEnter_('master-password', callback);
   document.getElementById('master-password-ok').addEventListener('click', callback);
   this.showMasterPassword_();

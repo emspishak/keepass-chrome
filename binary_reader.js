@@ -80,8 +80,8 @@ BinaryReader.prototype.readBytes = function(num) {
  * @return {number} The number.
  * @private
  */
-BinaryReader.prototype.readNumber_ = function(bytes) {
-  var bytes = this.readBytes(bytes);
+BinaryReader.prototype.readNumber_ = function(numBytes) {
+  var bytes = this.readBytes(numBytes);
   var result = 0;
   for (var i = bytes.length - 1; i >= 0; i--) {
     result = (result * 256) + bytes[i];
