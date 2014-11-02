@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * @constructor
  */
 keepasschrome.Popup = function() {};
-keepasschrome.Popup.API_BASE = 'https://www.googleapis.com/drive/v2';
+/** @const */ keepasschrome.Popup.API_BASE = 'https://www.googleapis.com/drive/v2';
 
 keepasschrome.Popup.prototype.start = function() {
   this.onEnter_('key-file-name', this.searchForKeyFile_.bind(this));

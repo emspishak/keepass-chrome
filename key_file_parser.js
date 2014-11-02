@@ -14,10 +14,10 @@ keepasschrome.KeyFileParser = function(arraybuffer) {
    */
   this.bytes_ = new keepasschrome.BinaryReader(arraybuffer);
 };
-keepasschrome.KeyFileParser.DATABASE_SIGNATURE_1 = 2594363651;
-keepasschrome.KeyFileParser.DATABASE_SIGNATURE_2 = 3041655653;
-keepasschrome.KeyFileParser.DATABASE_VERSION = 196612;
-keepasschrome.KeyFileParser.DATABASE_VERSION_MASK = 4294967040;
+/** @const */ keepasschrome.KeyFileParser.DATABASE_SIGNATURE_1 = 2594363651;
+/** @const */ keepasschrome.KeyFileParser.DATABASE_SIGNATURE_2 = 3041655653;
+/** @const */ keepasschrome.KeyFileParser.DATABASE_VERSION = 196612;
+/** @const */ keepasschrome.KeyFileParser.DATABASE_VERSION_MASK = 4294967040;
 
 
 /**
