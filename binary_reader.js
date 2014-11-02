@@ -8,8 +8,20 @@
  * @constructor
  */
 keepasschrome.BinaryReader = function(arraybuffer, opt_length) {
+
+  /**
+   * @private
+   */
   this.data_ = new Uint8Array(arraybuffer);
+
+  /**
+   * @private
+   */
   this.length_ = opt_length || arraybuffer.byteLength;
+
+  /**
+   * @private
+   */
   this.pos_ = 0;
 };
 

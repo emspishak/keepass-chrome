@@ -11,39 +11,43 @@
 keepasschrome.Group = function(id, title, image) {
 
   /**
-   * @type {!number}
+   * @private
    */
-  this.id = id;
+  this.id_ = id;
 
   /**
-   * @type {!string}
+   * @private
    */
-  this.title = title;
+  this.title_ = title;
 
   /**
-   * @type {!number}
+   * @private
    */
-  this.image = image;
+  this.image_ = image;
 
   /**
    * @type {?keepasschrome.Group}
+   * @private
    */
-  this.parent = null;
+  this.parent_ = null;
 
   /**
    * @type {!number}
+   * @private
    */
-  this.index = -1;
+  this.index_ = -1;
 
   /**
    * @type {!Array.<!keepasschrome.Group>}
+   * @private
    */
-  this.children = [];
+  this.children_ = [];
 
   /**
    * @type {!Array.<!keepasschrome.Entry>}
+   * @private
    */
-  this.entries = [];
+  this.entries_ = [];
 };
 
 
@@ -51,7 +55,7 @@ keepasschrome.Group = function(id, title, image) {
  * @return {!number} The ID.
  */
 keepasschrome.Group.prototype.getId = function() {
-  return this.id;
+  return this.id_;
 };
 
 
@@ -59,7 +63,7 @@ keepasschrome.Group.prototype.getId = function() {
  * @return {!string} The title.
  */
 keepasschrome.Group.prototype.getTitle = function() {
-  return this.title;
+  return this.title_;
 };
 
 
@@ -67,7 +71,7 @@ keepasschrome.Group.prototype.getTitle = function() {
  * @return {!number} The image.
  */
 keepasschrome.Group.prototype.getImage = function() {
-  return this.image;
+  return this.image_;
 };
 
 
@@ -75,9 +79,9 @@ keepasschrome.Group.prototype.getImage = function() {
  * @param {!keepasschrome.Group} child The child to add.
  */
 keepasschrome.Group.prototype.addChild = function(child) {
-  child.parent = this;
-  child.index = this.children.length;
-  this.children.push(child);
+  child.parent_ = this;
+  child.index_ = this.children_.length;
+  this.children_.push(child);
 };
 
 
@@ -86,7 +90,7 @@ keepasschrome.Group.prototype.addChild = function(child) {
  * @return {!keepasschrome.Group} The child group at the given index.
  */
 keepasschrome.Group.prototype.getChild = function(index) {
-  return this.children[index];
+  return this.children_[index];
 };
 
 
@@ -94,7 +98,7 @@ keepasschrome.Group.prototype.getChild = function(index) {
  * @return {!Array.<!keepasschrome.Group>} The child groups.
  */
 keepasschrome.Group.prototype.getChildren = function() {
-  return this.children;
+  return this.children_;
 };
 
 
@@ -103,8 +107,8 @@ keepasschrome.Group.prototype.getChildren = function() {
  */
 keepasschrome.Group.prototype.addEntry = function(entry) {
   entry.group = this;
-  entry.index = this.entries.length;
-  this.entries.push(entry);
+  entry.index = this.entries_.length;
+  this.entries_.push(entry);
 };
 
 
@@ -112,5 +116,5 @@ keepasschrome.Group.prototype.addEntry = function(entry) {
  * @return {!Array.<!keepasschrome.Entry>} The entries.
  */
 keepasschrome.Group.prototype.getEntries = function() {
-  return this.entries;
+  return this.entries_;
 };

@@ -7,11 +7,6 @@
  * @constructor
  */
 keepasschrome.KeyFileParser = function(arraybuffer) {
-
-  /**
-   * The encrypted bytes.
-   * @type {!keepasschrome.BinaryReader}
-   */
   this.bytes_ = new keepasschrome.BinaryReader(arraybuffer);
 };
 /** @const */ keepasschrome.KeyFileParser.DATABASE_SIGNATURE_1 = 2594363651;
