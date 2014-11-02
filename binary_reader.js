@@ -1,5 +1,5 @@
 /**
- * Reads binary data.
+ * @fileoverview Reads binary data.
  */
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Manages the UI of the KeePass Chrome extension.
+ * @fileoverview Manages the UI of the KeePass Chrome extension.
  */
 
 var keepasschrome = {};

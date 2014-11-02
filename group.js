@@ -1,4 +1,8 @@
 /**
+ * @fileoverview A group in a keefile.
+ */
+
+/**
  * @param {!string} id The group's ID.
  * @param {!string} title The title of the group.
  * @param {!string} image The group's image.

@@ -1,5 +1,5 @@
 /**
- * Decrypts and parses a keyfile.
+ * @fileoverview Decrypts and parses a keyfile.
  */
 
 /**
