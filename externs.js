@@ -53,13 +53,13 @@ CryptoJS.lib.WordArray.create = function(words, opt_sigBytes) {};
 /**
  * @type {number}
  */
-CryptoJS.lib.WordArray.prototype.sigBytes = 0;
+CryptoJS.lib.WordArray.prototype.sigBytes;
 
 
 /**
  * @type {Array}
  */
-CryptoJS.lib.WordArray.prototype.words = [];
+CryptoJS.lib.WordArray.prototype.words;
 
 
 CryptoJS.lib.WordArray.prototype.clamp = function() {};

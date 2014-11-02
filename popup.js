@@ -12,11 +12,16 @@ document.addEventListener('DOMContentLoaded', function() {
  * @constructor
  */
 keepasschrome.Popup = function() {};
-/** @const */ keepasschrome.Popup.API_BASE = 'https://www.googleapis.com/drive/v2';
+/** @const */ keepasschrome.Popup.API_BASE =
+    'https://www.googleapis.com/drive/v2';
 
+/**
+ * Starts the KeyPass Chrome extension.
+ */
 keepasschrome.Popup.prototype.start = function() {
   this.onEnter_('key-file-name', this.searchForKeyFile_.bind(this));
-  document.getElementById('key-file-search').addEventListener('click', this.searchForKeyFile_.bind(this));
+  document.getElementById('key-file-search').addEventListener('click',
+      this.searchForKeyFile_.bind(this));
 };
 
 
@@ -39,7 +44,8 @@ keepasschrome.Popup.prototype.hideError_ = function() {
 
 /**
  * Shows the last API error, if there was one.
- * @return {!boolean} True if the last API call resulted in an error, false otherwise.
+ * @return {!boolean} True if the last API call resulted in an error, false
+ *     otherwise.
  * @private
  */
 keepasschrome.Popup.prototype.checkError_ = function() {
@@ -59,7 +65,8 @@ keepasschrome.Popup.prototype.searchForKeyFile_ = function() {
   var encodedQuery = encodeURIComponent(query).replace("'", "\\'");
   document.getElementById('files').innerHTML = '';
   this.showLoading_('Searching Drive...');
-  this.sendXhr_('GET', keepasschrome.Popup.API_BASE + '/files?q=title+=+\'' + encodedQuery + '\'', this.displayFiles_.bind(this));
+  this.sendXhr_('GET', keepasschrome.Popup.API_BASE + '/files?q=title+=+\'' +
+      encodedQuery + '\'', this.displayFiles_.bind(this));
 };
 
 
@@ -67,12 +74,17 @@ keepasschrome.Popup.prototype.searchForKeyFile_ = function() {
  * Sends an authenticated XHR.
  * @param {!string} method The HTTP method to use (GET, POST, etc.).
  * @param {!string} url The URL to send the request to.
- * @param {!function(!XMLHttpRequest)} callback The function to call when the request is complete.
- * @param {string=} opt_responseType The type of the response property, defaults to string.
+ * @param {!function(!XMLHttpRequest)} callback The function to call when the
+ *     request is complete.
+ * @param {string=} opt_responseType The type of the response property, defaults
+ *     to string.
  * @private
  */
-keepasschrome.Popup.prototype.sendXhr_ = function(method, url, callback, opt_responseType) {
-  chrome.identity.getAuthToken({ 'interactive': true }, this.getAuthTokenCallback_.bind(this, method, url, callback, opt_responseType));
+keepasschrome.Popup.prototype.sendXhr_ = function(method, url, callback,
+    opt_responseType) {
+  chrome.identity.getAuthToken({ 'interactive': true },
+      this.getAuthTokenCallback_.bind(this, method, url, callback,
+          opt_responseType));
 };
 
 
@@ -80,11 +92,15 @@ keepasschrome.Popup.prototype.sendXhr_ = function(method, url, callback, opt_res
  * Sends an XHR with the given authentication token.
  * @param {!string} method The HTTP method to use (GET, POST, etc.).
  * @param {!string} url The URL to send the request to.
- * @param {!function(!XMLHttpRequest)} callback The function to call when the request is complete.
- * @param {string|undefined} responseType The type of the response property, defaults to string.
+ * @param {!function(!XMLHttpRequest)} callback The function to call when the
+ *     request is complete.
+ * @param {string|undefined} responseType The type of the response property,
+ *     defaults to string.
  * @param {string=} token The authentication token.
+ * @private
  */
-keepasschrome.Popup.prototype.getAuthTokenCallback_ = function(method, url, callback, responseType, token) {
+keepasschrome.Popup.prototype.getAuthTokenCallback_ = function(method, url,
+    callback, responseType, token) {
   if (this.checkError_()) {
     return;
   }
@@ -103,7 +119,8 @@ keepasschrome.Popup.prototype.getAuthTokenCallback_ = function(method, url, call
 
 /**
  * Displays the files that match the types in keyfile name.
- * @param {!XMLHttpRequest} request The XMLHttpRequest of the request to search for the keyfile.
+ * @param {!XMLHttpRequest} request The XMLHttpRequest of the request to search
+ *     for the keyfile.
  * @private
  */
 keepasschrome.Popup.prototype.displayFiles_ = function(request) {
@@ -115,7 +132,8 @@ keepasschrome.Popup.prototype.displayFiles_ = function(request) {
       var file = files.items[i];
       var li = document.createElement('li');
       li.textContent = file.title;
-      li.addEventListener('click', this.handleKeyFileClick_.bind(this, file.id));
+      li.addEventListener('click',
+          this.handleKeyFileClick_.bind(this, file.id));
       ul.appendChild(li);
     }
   } else {
@@ -128,7 +146,8 @@ keepasschrome.Popup.prototype.displayFiles_ = function(request) {
 
 
 /**
- * Called on a click on a keyfile name, shows the password field for the keyfile.
+ * Called on a click on a keyfile name, shows the password field for the
+ * keyfile.
  * @param {string=} opt_keyFileId The ID of the keyfile.
  * @private
  */
@@ -140,40 +159,47 @@ keepasschrome.Popup.prototype.handleKeyFileClick_ = function(opt_keyFileId) {
   document.getElementById('key-file-select').style.display = 'none';
   var callback = this.handleMasterPasswordOkClick_.bind(this, opt_keyFileId);
   this.onEnter_('master-password', callback);
-  document.getElementById('master-password-ok').addEventListener('click', callback);
+  document.getElementById('master-password-ok')
+      .addEventListener('click', callback);
   this.showMasterPassword_();
 };
 
 
 /**
- * Called after typing the password and clicking OK. Commences fetching the keyfile, decrypting it, and display the contents.
+ * Called after typing the password and clicking OK. Commences fetching the
+ * keyfile, decrypting it, and display the contents.
  * @param {!string} keyFileId The ID of the keyfile.
  * @private
  */
-keepasschrome.Popup.prototype.handleMasterPasswordOkClick_ = function(keyFileId) {
+keepasschrome.Popup.prototype.handleMasterPasswordOkClick_ =
+    function(keyFileId) {
   // If the 'invalid password' error is shown.
   this.hideError_();
   document.getElementById('master-password-enter').style.display = 'none';
   this.showLoading_('Getting key file...');
-  this.sendXhr_('GET', keepasschrome.Popup.API_BASE + '/files/' + keyFileId, this.fetchKeyFile_.bind(this));
+  this.sendXhr_('GET', keepasschrome.Popup.API_BASE + '/files/' + keyFileId,
+      this.fetchKeyFile_.bind(this));
 };
 
 
 /**
  * Actually fetches the keyfile after the API call to get the keyfile URL.
- * @param {!XMLHttpRequest} request The XMLHttpRequest of the request to get the key file metadata.
+ * @param {!XMLHttpRequest} request The XMLHttpRequest of the request to get the
+ *     key file metadata.
  * @private
  */
 keepasschrome.Popup.prototype.fetchKeyFile_ = function(request) {
   var file = JSON.parse(request.responseText);
   var downloadUrl = file['downloadUrl'];
-  this.sendXhr_('GET', downloadUrl, this.processKeyFile_.bind(this), 'arraybuffer');
+  this.sendXhr_('GET', downloadUrl, this.processKeyFile_.bind(this),
+      'arraybuffer');
 };
 
 
 /**
  * Decrypts and displays the keyfile.
- * @param {!XMLHttpRequest} request The XMLHttpRequest of the request with the keyfile contents.
+ * @param {!XMLHttpRequest} request The XMLHttpRequest of the request with the
+ *     keyfile contents.
  * @private
  */
 keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
@@ -181,7 +207,8 @@ keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
   var password = document.getElementById('master-password').value;
   var response = request.response;
   if (!(response instanceof ArrayBuffer)) {
-    this.showError_('XHR response expected to be ArrayBuffer but got ' + response.toString());
+    this.showError_('XHR response expected to be ArrayBuffer but got ' +
+        response.toString());
     this.showMasterPassword_();
     return;
   }
@@ -278,13 +305,13 @@ keepasschrome.Popup.prototype.createEntryElement_ = function(entry) {
  * @private
  */
 keepasschrome.Popup.prototype.shouldDisplayEntry_ = function(entry) {
-  return typeof entry.binary === 'undefined'
-    || typeof entry.comment === 'undefined' || entry.comment === ''
-    || entry.binaryDesc != 'bin-stream'
-    || entry.title != 'Meta-Info'
-    || entry.username != 'SYSTEM'
-    || entry.url != '$'
-    || entry.image != 0;
+  return typeof entry.binary === 'undefined' ||
+    typeof entry.comment === 'undefined' || entry.comment === '' ||
+    entry.binaryDesc != 'bin-stream' ||
+    entry.title != 'Meta-Info' ||
+    entry.username != 'SYSTEM' ||
+    entry.url != '$' ||
+    entry.image != 0;
 };
 
 
@@ -319,7 +346,8 @@ keepasschrome.Popup.prototype.showMasterPassword_ = function() {
 
 
 /**
- * Sets the element with the given ID to call the given callback when the user presses enter.
+ * Sets the element with the given ID to call the given callback when the user
+ * presses enter.
  * @param {!string} id The ID to set the callback on.
  * @param {!function()} callback The callback.
  * @private

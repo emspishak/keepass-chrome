@@ -4,7 +4,8 @@
 
 /**
  * @param {!ArrayBuffer} arraybuffer The binary data to read.
- * @param {number=} opt_length The length of the data, uses the ArrayBuffers byte length if this isn't specified.
+ * @param {number=} opt_length The length of the data, uses the ArrayBuffers
+ *     byte length if this isn't specified.
  * @constructor
  */
 keepasschrome.BinaryReader = function(arraybuffer, opt_length) {
@@ -36,12 +37,13 @@ keepasschrome.BinaryReader.fromWordArray = function(wordArray) {
                    Uint32Array.BYTES_PER_ELEMENT;
   var buf = new ArrayBuffer(length);
   var words = new Uint32Array(buf);
-  // swap endianness, from http://stackoverflow.com/questions/5320439/#answer-5320624
+  // swap endianness, from
+  // http://stackoverflow.com/questions/5320439/#answer-5320624
   words.set(wordArray.words.map(function(val) {
-    return ((val & 0xFF) << 24)
-           | ((val & 0xFF00) << 8)
-           | ((val >> 8) & 0xFF00)
-           | ((val >> 24) & 0xFF);
+    return ((val & 0xFF) << 24) |
+        ((val & 0xFF00) << 8) |
+        ((val >> 8) & 0xFF00) |
+        ((val >> 24) & 0xFF);
   }));
   return new keepasschrome.BinaryReader(buf, wordArray.sigBytes);
 };

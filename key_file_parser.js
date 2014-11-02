@@ -28,7 +28,8 @@ keepasschrome.KeyFileParser.prototype.parse = function(password) {
   var encryptedData = this.bytes_.readRestToWordArray();
   var key = this.transformKey_(password, header.masterSeed, header.masterSeed2,
       header.keyEncryptionRounds);
-  var decryptedData = this.decryptFile_(header.flags, encryptedData, key, header.encryptionInitialValue, header.contentsHash);
+  var decryptedData = this.decryptFile_(header.flags, encryptedData, key,
+      header.encryptionInitialValue, header.contentsHash);
   var rest = keepasschrome.BinaryReader.fromWordArray(decryptedData);
   return this.parseContents_(rest, header.groups, header.entries);
 };
@@ -76,32 +77,37 @@ keepasschrome.KeyFileParser.prototype.parseHeaderFlags_ = function() {
 /**
  * Verifies that the keyfile is the supported version.
  * @param {!keepasschrome.KeyFileHeader} header The keyfile header.
- * @return {!boolean} True if the keyfile is the supported verison, false otherwise.
+ * @return {!boolean} True if the keyfile is the supported verison, false
+ *     otherwise.
  * @private
  */
 keepasschrome.KeyFileParser.prototype.verifyVersion_ = function(header) {
-  return header.signature1 == keepasschrome.KeyFileParser.DATABASE_SIGNATURE_1
-      && header.signature2 == keepasschrome.KeyFileParser.DATABASE_SIGNATURE_2
-      && (header.version & keepasschrome.KeyFileParser.DATABASE_VERSION_MASK)
-          == (keepasschrome.KeyFileParser.DATABASE_VERSION & keepasschrome.KeyFileParser.DATABASE_VERSION_MASK);
+  var Constants = keepasschrome.KeyFileParser;
+  return header.signature1 == Constants.DATABASE_SIGNATURE_1 &&
+      header.signature2 == Constants.DATABASE_SIGNATURE_2 &&
+      (header.version & Constants.DATABASE_VERSION_MASK) ==
+          (Constants.DATABASE_VERSION & Constants.DATABASE_VERSION_MASK);
 };
 
 
 /**
  * Transforms the password into the key used to decrypt the keyfile.
  * @param {!string} plainTextKey The password to decrypt the keyfile.
- * @param {!CryptoJS.lib.WordArray} masterSeed The master seed from the keyfile header.
- * @param {!CryptoJS.lib.WordArray} masterSeed2 The second master seed from the keyfile header.
+ * @param {!CryptoJS.lib.WordArray} masterSeed The master seed from the keyfile
+ *     header.
+ * @param {!CryptoJS.lib.WordArray} masterSeed2 The second master seed from the
+ *     keyfile header.
  * @param {!number} keyEncryptionRounds The number of rounds needed to decrypt.
  * @return {!CryptoJS.lib.WordArray} The key to decrypt the keyfile.
+ * @private
  */
-keepasschrome.KeyFileParser.prototype.transformKey_ = function(plainTextKey, masterSeed, masterSeed2,
-      keyEncryptionRounds) {
+keepasschrome.KeyFileParser.prototype.transformKey_ = function(plainTextKey,
+    masterSeed, masterSeed2, keyEncryptionRounds) {
   var hashedKey = CryptoJS.SHA256(plainTextKey);
   var encrypted = hashedKey;
   var cfg = {
-    "mode": CryptoJS.mode.ECB,
-    "padding": CryptoJS.pad.NoPadding
+    'mode': CryptoJS.mode.ECB,
+    'padding': CryptoJS.pad.NoPadding
   };
   for (var i = 0; i < keyEncryptionRounds; i++) {
     encrypted = CryptoJS.AES.encrypt(encrypted, masterSeed2, cfg).ciphertext;
@@ -113,22 +119,25 @@ keepasschrome.KeyFileParser.prototype.transformKey_ = function(plainTextKey, mas
 /**
  * Decrypts the keyfile.
  * @param {!keepasschrome.KeyFileHeader.Flags} headerFlags The header flags.
- * @param {!CryptoJS.lib.WordArray} encryptedData The encrypted part of the keyfile.
+ * @param {!CryptoJS.lib.WordArray} encryptedData The encrypted part of the
+ *     keyfile.
  * @param {!CryptoJS.lib.WordArray} key The key to decrypt the keyfile.
- * @param {!CryptoJS.lib.WordArray} encryptionInitialValue The IV key from the header.
- * @param {!CryptoJS.lib.WordArray} contentsHash The hash of the contents to check that the decryption succeeds.
+ * @param {!CryptoJS.lib.WordArray} encryptionInitialValue The IV key from the
+ *     header.
+ * @param {!CryptoJS.lib.WordArray} contentsHash The hash of the contents to
+ *     check that the decryption succeeds.
  * @return {!CryptoJS.lib.WordArray} The decrypted keyfile.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.decryptFile_ = function(headerFlags, encryptedData, key,
-      encryptionInitialValue, contentsHash) {
+keepasschrome.KeyFileParser.prototype.decryptFile_ = function(headerFlags,
+      encryptedData, key, encryptionInitialValue, contentsHash) {
   var cipherParams = CryptoJS.lib.CipherParams.create({
       ciphertext: encryptedData
   });
   var cfg = {
-    "mode": CryptoJS.mode.CBC,
-    "iv": encryptionInitialValue,
-    "padding": CryptoJS.pad.Pkcs7
+    'mode': CryptoJS.mode.CBC,
+    'iv': encryptionInitialValue,
+    'padding': CryptoJS.pad.Pkcs7
   };
   var decryptedData;
   if (headerFlags.rijndael) {
@@ -136,11 +145,11 @@ keepasschrome.KeyFileParser.prototype.decryptFile_ = function(headerFlags, encry
   } else if (headerFlags.twofish) {
     decryptedData = this.decryptTwoFish_(cipherParams, key, cfg);
   } else {
-    throw new Error("Invalid encryption type");
+    throw new Error('Invalid encryption type');
   }
   var hash = CryptoJS.SHA256(decryptedData);
   if (hash.toString() !== contentsHash.toString()) {
-    throw new Error("Invalid password");
+    throw new Error('Invalid password');
   }
   return decryptedData;
 };
@@ -148,13 +157,15 @@ keepasschrome.KeyFileParser.prototype.decryptFile_ = function(headerFlags, encry
 
 /**
  * Decrypts the keyfile with AES.
- * @param {!CryptoJS.lib.CipherParams} cipherParams The cipher params containing the bytes to decrypt.
+ * @param {!CryptoJS.lib.CipherParams} cipherParams The cipher params containing
+ *     the bytes to decrypt.
  * @param {!CryptoJS.lib.WordArray} key The decryption key.
  * @param {!Object} cfg The decryption parameters.
  * @return {!CryptoJS.lib.WordArray} The decrypted bytes.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.decryptAes_ = function(cipherParams, key, cfg) {
+keepasschrome.KeyFileParser.prototype.decryptAes_ = function(cipherParams, key,
+      cfg) {
   var decryptedData = CryptoJS.AES.decrypt(cipherParams, key, cfg);
   decryptedData.clamp();
   return decryptedData;
@@ -163,13 +174,15 @@ keepasschrome.KeyFileParser.prototype.decryptAes_ = function(cipherParams, key, 
 
 /**
  * Decrypts the keyfile with Two Fish.
- * @param {!CryptoJS.lib.CipherParams} cipherParams The cipher params containing the bytes to decrypt.
+ * @param {!CryptoJS.lib.CipherParams} cipherParams The cipher params containing
+ *     the bytes to decrypt.
  * @param {!CryptoJS.lib.WordArray} key The decryption key.
  * @param {!Object} cfg The decryption parameters.
  * @return {!CryptoJS.lib.WordArray} The decrypted bytes.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.decryptTwoFish_ = function(cipherParams, key, cfg) {
+keepasschrome.KeyFileParser.prototype.decryptTwoFish_ = function(cipherParams,
+    key, cfg) {
   var decryptedData = CryptoJS.TwoFish.decrypt(cipherParams, key, cfg);
   decryptedData.clamp();
   return decryptedData;
@@ -184,7 +197,8 @@ keepasschrome.KeyFileParser.prototype.decryptTwoFish_ = function(cipherParams, k
  * @return {!keepasschrome.Group} The top group of the key file.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.parseContents_ = function(contents, numGroups, numEntries) {
+keepasschrome.KeyFileParser.prototype.parseContents_ = function(contents,
+    numGroups, numEntries) {
   var groups = [];
   var levels = [];
   for (var curGroup = 0; curGroup < numGroups; curGroup++) {
@@ -325,13 +339,16 @@ keepasschrome.KeyFileParser.prototype.readEntry_ = function(contents) {
  * @param {!keepasschrome.Group} rootGroup The top group.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.createGroupTree_ = function(levels, groups, rootGroup) {
+keepasschrome.KeyFileParser.prototype.createGroupTree_ = function(levels,
+    groups, rootGroup) {
   for (var i = 0; i < groups.length; i++) {
     if (levels[i] == 0) {
       rootGroup.addChild(groups[i]);
     } else {
       var parentGroupIndex = this.findParentGroupIndex_(i, levels);
-      var parentGroup = (parentGroupIndex == -1) ? rootGroup : groups[parentGroupIndex];
+      var parentGroup = (parentGroupIndex == -1) ?
+          rootGroup :
+          groups[parentGroupIndex];
       parentGroup.addChild(groups[i]);
     }
   }
@@ -344,7 +361,8 @@ keepasschrome.KeyFileParser.prototype.createGroupTree_ = function(levels, groups
  * @return {!number} The index in the levels of the parent group.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.findParentGroupIndex_ = function(currentGroupIndex, levels) {
+keepasschrome.KeyFileParser.prototype.findParentGroupIndex_ = function(
+    currentGroupIndex, levels) {
   var j;
   for (j = currentGroupIndex - 1; j >= 0; j--) {
     if (levels[j] < levels[currentGroupIndex]) {
@@ -366,7 +384,8 @@ keepasschrome.KeyFileParser.prototype.findParentGroupIndex_ = function(currentGr
  * @param {!keepasschrome.Group} rootGroup The top group.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.assignEntriesToGroups_ = function(entries, groups, rootGroup) {
+keepasschrome.KeyFileParser.prototype.assignEntriesToGroups_ = function(entries,
+    groups, rootGroup) {
   for (var e = 0; e < entries.length; e++) {
     var group = this.findGroup_(entries[e], groups, rootGroup);
     group.addEntry(entries[e]);
@@ -379,9 +398,12 @@ keepasschrome.KeyFileParser.prototype.assignEntriesToGroups_ = function(entries,
  * @param {!keepasschrome.Entry} entry The entry.
  * @param {!Array.<!keepasschrome.Group>} groups The groups.
  * @param {!keepasschrome.Group} rootGroup The top group.
- * @return {!keepasschrome.Group} The group that the entry belongs in, or the first group if the entry's group doesn't exist.
+ * @return {!keepasschrome.Group} The group that the entry belongs in, or the
+ *     first group if the entry's group doesn't exist.
+ * @private
  */
-keepasschrome.KeyFileParser.prototype.findGroup_ = function(entry, groups, rootGroup) {
+keepasschrome.KeyFileParser.prototype.findGroup_ = function(entry, groups,
+    rootGroup) {
   for (var g = 0; g < groups.length; g++) {
     if (entry.groupId == groups[g].getId()) {
       return groups[g];
