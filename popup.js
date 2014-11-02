@@ -234,7 +234,7 @@ keepasschrome.Popup.prototype.createGroupElement_ = function(group) {
 
 /**
  * Creates an entry element to display on the page.
- * @param {!Object.<!string, !string>} entry The entry to create the element for.
+ * @param {!keepasschrome.Entry} entry The entry to create the element for.
  * @return {!Element} The element.
  * @private
  */
@@ -264,7 +264,7 @@ keepasschrome.Popup.prototype.createEntryElement_ = function(entry) {
 
 /**
  * Determines if the given entry should be displayed.
- * @param {!Object.<!string, !string>} entry The entry.
+ * @param {!keepasschrome.Entry} entry The entry.
  * @return {!boolean} True if the entry should be displayed, false otherwise.
  * @private
  */

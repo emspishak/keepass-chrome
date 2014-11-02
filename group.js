@@ -41,7 +41,7 @@ keepasschrome.Group = function(id, title, image) {
   this.children = [];
 
   /**
-   * @type {!Array.<!Object>}
+   * @type {!Array.<!keepasschrome.Entry>}
    */
   this.entries = [];
 };
@@ -99,7 +99,7 @@ keepasschrome.Group.prototype.getChildren = function() {
 
 
 /**
- * @param {!Object} entry The entry to add.
+ * @param {!keepasschrome.Entry} entry The entry to add.
  */
 keepasschrome.Group.prototype.addEntry = function(entry) {
   entry.group = this;
@@ -109,7 +109,7 @@ keepasschrome.Group.prototype.addEntry = function(entry) {
 
 
 /**
- * @return {!Array.<!Object>} The entries.
+ * @return {!Array.<!keepasschrome.Entry>} The entries.
  */
 keepasschrome.Group.prototype.getEntries = function() {
   return this.entries;

@@ -268,57 +268,57 @@ keepasschrome.KeyFileParser.prototype.readGroup_ = function(contents, levels) {
 /**
  * Reads in an entry from the decrypted key file.
  * @param {!keepasschrome.BinaryReader} contents The decrypted key file.
- * @return {!Object} The parsed entry.
+ * @return {!keepasschrome.Entry} The parsed entry.
  * @private
  */
 keepasschrome.KeyFileParser.prototype.readEntry_ = function(contents) {
-  var entry = {};
+  var entry = new keepasschrome.Entry();
   var fieldType = -1;
   while (fieldType != 65535) {
     fieldType = contents.readShort();
     var fieldSize = contents.readInt();
     switch (fieldType) {
       case 1:
-        entry['uuid'] = contents.readBytes(16);
+        entry.uuid = contents.readBytes(16);
         break;
       case 2:
-        entry['groupId'] = contents.readInt();
+        entry.groupId = contents.readInt();
         break;
       case 3:
-        entry['image'] = contents.readInt();
+        entry.image = contents.readInt();
         break;
       case 4:
-        entry['title'] = contents.readString();
+        entry.title = contents.readString();
         break;
       case 5:
-        entry['url'] = contents.readString();
+        entry.url = contents.readString();
         break;
       case 6:
-        entry['username'] = contents.readString();
+        entry.username = contents.readString();
         break;
       case 7:
-        entry['password'] = contents.readString();
+        entry.password = contents.readString();
         break;
       case 8:
-        entry['comment'] = contents.readString();
+        entry.comment = contents.readString();
         break;
       case 9:
-        entry['creation'] = contents.readDate();
+        entry.creation = contents.readDate();
         break;
       case 10:
-        entry['lastModified'] = contents.readDate();
+        entry.lastModified = contents.readDate();
         break;
       case 11:
-        entry['lastAccessed'] = contents.readDate();
+        entry.lastAccessed = contents.readDate();
         break;
       case 12:
-        entry['expires'] = contents.readDate();
+        entry.expires = contents.readDate();
         break;
       case 13:
-        entry['binaryDesc'] = contents.readString();
+        entry.binaryDesc = contents.readString();
         break;
       case 14:
-        entry['binary'] = contents.readBytes(fieldSize);
+        entry.binary = contents.readBytes(fieldSize);
         break;
 
       // Unused field types
@@ -376,7 +376,7 @@ keepasschrome.KeyFileParser.prototype.findParentGroupIndex_ = function(currentGr
 
 /**
  * Puts entries in their group.
- * @param {!Array.<!Object>} entries The entries.
+ * @param {!Array.<!keepasschrome.Entry>} entries The entries.
  * @param {!Array.<!keepasschrome.Group>} groups The groups.
  * @param {!keepasschrome.Group} rootGroup The top group.
  * @private
@@ -391,7 +391,7 @@ keepasschrome.KeyFileParser.prototype.assignEntriesToGroups_ = function(entries,
 
 /**
  * Finds the group that the given entry belongs in.
- * @param {!Object} entry The entry.
+ * @param {!keepasschrome.Entry} entry The entry.
  * @param {!Array.<!keepasschrome.Group>} groups The groups.
  * @param {!keepasschrome.Group} rootGroup The top group.
  * @return {!keepasschrome.Group} The group that the entry belongs in, or the first group if the entry's group doesn't exist.
