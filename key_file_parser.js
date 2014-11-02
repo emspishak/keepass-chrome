@@ -1,11 +1,30 @@
-function KeyFileParser(arraybuffer) {
+/**
+ * Decrypts and parses a keyfile.
+ */
+
+/**
+ * @param {!ArrayBuffer} arraybuffer The keyfile bytes.
+ * @constructor
+ */
+KeyFileParser = function(arraybuffer) {
+
+  /**
+   * The encrypted bytes.
+   * @type {!BinaryReader}
+   */
   this.bytes_ = new BinaryReader(arraybuffer);
-}
+};
 KeyFileParser.DATABASE_SIGNATURE_1 = 2594363651;
 KeyFileParser.DATABASE_SIGNATURE_2 = 3041655653;
 KeyFileParser.DATABASE_VERSION = 196612;
 KeyFileParser.DATABASE_VERSION_MASK = 4294967040;
 
+
+/**
+ * Parses the keyfile with the given password.
+ * @param {!string} password The password to decrypt the keyfile.
+ * @return {Object} the parsed keyfile contents.
+ */
 KeyFileParser.prototype.parse = function(password) {
   var result = {};
   var header = this.parseHeader_();
@@ -29,6 +48,12 @@ KeyFileParser.prototype.parse = function(password) {
   return result;
 };
 
+
+/**
+ * Parses the keyfile header.
+ * @return {Object} The parsed header.
+ * @private
+ */
 KeyFileParser.prototype.parseHeader_ = function() {
   return {
     "signature1": this.bytes_.readInt(),
@@ -45,6 +70,12 @@ KeyFileParser.prototype.parseHeader_ = function() {
   };
 };
 
+
+/**
+ * Parses the header flags.
+ * @return {Object} The parsed header flags.
+ * @private
+ */
 KeyFileParser.prototype.parseHeaderFlags_ = function() {
   var b = this.bytes_.readInt();
   return {
@@ -55,6 +86,13 @@ KeyFileParser.prototype.parseHeaderFlags_ = function() {
   };
 };
 
+
+/**
+ * Verifies that the keyfile is the supported version.
+ * @param {!Object} The keyfile header.
+ * @return {boolean} True if the keyfile is the supported verison, false otherwise.
+ * @private
+ */
 KeyFileParser.prototype.verifyVersion_ = function(header) {
   return header['signature1'] == KeyFileParser.DATABASE_SIGNATURE_1
       && header['signature2'] == KeyFileParser.DATABASE_SIGNATURE_2
@@ -62,6 +100,15 @@ KeyFileParser.prototype.verifyVersion_ = function(header) {
           == (KeyFileParser.DATABASE_VERSION & KeyFileParser.DATABASE_VERSION_MASK);
 };
 
+
+/**
+ * Transforms the password into the key used to decrypt the keyfile.
+ * @param {!string} plainTextKey The password to decrypt the keyfile.
+ * @param {!WordArray} masterSeed The master seed from the keyfile header.
+ * @param {!WordArray} masterSeed2 The second master seed from the keyfile header.
+ * @param {!number} keyEncryptionRounds The number of rounds needed to decrypt.
+ * @return {WordArray} The key to decrypt the keyfile.
+ */
 KeyFileParser.prototype.transformKey_ = function(plainTextKey, masterSeed, masterSeed2,
       keyEncryptionRounds) {
   var hashedKey = CryptoJS.SHA256(plainTextKey);
@@ -76,6 +123,17 @@ KeyFileParser.prototype.transformKey_ = function(plainTextKey, masterSeed, maste
   return CryptoJS.SHA256(masterSeed.concat(CryptoJS.SHA256(encrypted)));
 };
 
+
+/**
+ * Decrypts the keyfile.
+ * @param {!Object} headerFlags The header flags.
+ * @param {!WordArray} encryptedData The encrypted part of the keyfile.
+ * @param {!WordArray} key The key to decrypt the keyfile.
+ * @param {!WordArray} encryptionInitialValue The IV key from the header.
+ * @param {!WordArray} contentsHash The hash of the contents to check that the decryption succeeds.
+ * @return {WordArray} The decrypted keyfile.
+ * @private
+ */
 KeyFileParser.prototype.decryptFile_ = function(headerFlags, encryptedData, key,
       encryptionInitialValue, contentsHash) {
   var cipherParams = CryptoJS.lib.CipherParams.create({
@@ -101,18 +159,45 @@ KeyFileParser.prototype.decryptFile_ = function(headerFlags, encryptedData, key,
   return decryptedData;
 };
 
+
+/**
+ * Decrypts the keyfile with AES.
+ * @param {!CipherParams} cipherParams The cipher params containing the bytes to decrypt.
+ * @param {!WordArray} key The decryption key.
+ * @param {!Object} config The decryption parameters.
+ * @return {WordArray} The decrypted bytes.
+ * @private
+ */
 KeyFileParser.prototype.decryptAes_ = function(cipherParams, key, cfg) {
   var decryptedData = CryptoJS.AES.decrypt(cipherParams, key, cfg);
   decryptedData.clamp();
   return decryptedData;
 };
 
+
+/**
+ * Decrypts the keyfile with Two Fish.
+ * @param {!CipherParams} cipherParams The cipher params containing the bytes to decrypt.
+ * @param {!WordArray} key The decryption key.
+ * @param {!Object} config The decryption parameters.
+ * @return {WordArray} The decrypted bytes.
+ * @private
+ */
 KeyFileParser.prototype.decryptTwoFish_ = function(cipherParams, key, cfg) {
   var decryptedData = CryptoJS.TwoFish.decrypt(cipherParams, key, cfg);
   decryptedData.clamp();
   return decryptedData;
 };
 
+
+/**
+ * Parses the decryped key file.
+ * @param {!BinaryReader} contents The decrypted key file.
+ * @param {number} numGroups The number of groups in the key file.
+ * @param {number} numEntries The number of entries in the key file.
+ * @return {Group} The top group of the key file.
+ * @private
+ */
 KeyFileParser.prototype.parseContents_ = function(contents, numGroups, numEntries) {
   var groups = [];
   var levels = [];
@@ -131,6 +216,14 @@ KeyFileParser.prototype.parseContents_ = function(contents, numGroups, numEntrie
   return rootGroup;
 };
 
+
+/**
+ * Reads in a group from the decrypted key file.
+ * @param {!BinaryReader} contents The decrypted key file.
+ * @param {!Array.<number>} levels A list of the levels.
+ * @return {Group} the parsed group.
+ * @private
+ */
 KeyFileParser.prototype.readGroup_ = function(contents, levels) {
   var id = undefined;
   var title = undefined;
@@ -170,6 +263,13 @@ KeyFileParser.prototype.readGroup_ = function(contents, levels) {
   return new Group(id, title, image);
 };
 
+
+/**
+ * Reads in an entry from the decrypted key file.
+ * @param {!BinaryReader} contents The decrypted key file.
+ * @return {Object} The parsed entry.
+ * @private
+ */
 KeyFileParser.prototype.readEntry_ = function(contents) {
   var entry = {};
   var fieldType = -1;
@@ -231,6 +331,14 @@ KeyFileParser.prototype.readEntry_ = function(contents) {
   return entry;
 };
 
+
+/**
+ * Builds the groups into a tree.
+ * @param {!Array.<number>} levels A list of the levels.
+ * @param {!Array.<Group>} groups The groups.
+ * @param {!Group} rootGroup The top group.
+ * @private
+ */
 KeyFileParser.prototype.createGroupTree_ = function(levels, groups, rootGroup) {
   for (var i = 0; i < groups.length; i++) {
     if (levels[i] == 0) {
@@ -243,6 +351,13 @@ KeyFileParser.prototype.createGroupTree_ = function(levels, groups, rootGroup) {
   }
 };
 
+/**
+ * Finds the index in the levels for the parent group of the current group.
+ * @param {number} currentGroupIndex The index of the current group.
+ * @param {!Array.<number>} levels A list of the levels.
+ * @return {number} The index in the levels of the parent group.
+ * @private
+ */
 KeyFileParser.prototype.findParentGroupIndex_ = function(currentGroupIndex, levels) {
   var j;
   for (j = currentGroupIndex - 1; j >= 0; j--) {
@@ -257,6 +372,14 @@ KeyFileParser.prototype.findParentGroupIndex_ = function(currentGroupIndex, leve
   return -1;
 };
 
+
+/**
+ * Puts entries in their group.
+ * @param {!Array.<Object>} entries The entries.
+ * @param {!Array.<Group>} groups The groups.
+ * @param {!Group} rootGroup The top group.
+ * @private
+ */
 KeyFileParser.prototype.assignEntriesToGroups_ = function(entries, groups, rootGroup) {
   for (var e = 0; e < entries.length; e++) {
     var group = this.findGroup_(entries[e], groups, rootGroup);
@@ -264,6 +387,14 @@ KeyFileParser.prototype.assignEntriesToGroups_ = function(entries, groups, rootG
   }
 };
 
+
+/**
+ * Finds the group that the given entry belongs in.
+ * @param {!Object} entry The entry.
+ * @param {!Array.<Group>} groups The groups.
+ * @param {!Group} rootGroup The top group.
+ * @return {Group} The group that the entry belongs in, or the first group if the entry's group doesn't exist.
+ */
 KeyFileParser.prototype.findGroup_ = function(entry, groups, rootGroup) {
   for (var g = 0; g < groups.length; g++) {
     if (entry.groupId == groups[g].getId()) {

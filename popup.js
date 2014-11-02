@@ -1,7 +1,14 @@
+/**
+ * Manages the UI of the KeePass Chrome extension.
+ */
+
 document.addEventListener('DOMContentLoaded', function() {
   new Popup().start();
 });
 
+/**
+ * @constructor
+ */
 Popup = function() {};
 Popup.API_BASE = 'https://www.googleapis.com/drive/v2';
 
@@ -10,14 +17,29 @@ Popup.prototype.start = function() {
   document.getElementById('key-file-search').addEventListener('click', this.searchForKeyFile_.bind(this));
 };
 
+
+/**
+ * @param {!string} message The error message to show.
+ * @private
+ */
 Popup.prototype.showError_ = function(message) {
   document.getElementById('error').textContent = message;
 };
 
+
+/**
+ * @private
+ */
 Popup.prototype.hideError_ = function() {
   document.getElementById('error').innerHTML = '';
 };
 
+
+/**
+ * Shows the last API error, if there was one.
+ * @return {!boolean} True if the last API call resulted in an error, false otherwise.
+ * @private
+ */
 Popup.prototype.checkError_ = function() {
   if (chrome.runtime.lastError) {
     this.showError_(chrome.runtime.lastError.message);
@@ -25,6 +47,11 @@ Popup.prototype.checkError_ = function() {
   return !!chrome.runtime.lastError;
 };
 
+
+/**
+ * Queries Drive for a keyfile with a name matching what the user typed in.
+ * @private
+ */
 Popup.prototype.searchForKeyFile_ = function() {
   var query = document.getElementById('key-file-name').value;
   var encodedQuery = encodeURIComponent(query).replace("'", "\\'");
@@ -33,11 +60,29 @@ Popup.prototype.searchForKeyFile_ = function() {
   this.sendXhr_('GET', Popup.API_BASE + '/files?q=title+=+\'' + encodedQuery + '\'', this.displayFiles_.bind(this));
 };
 
+
+/**
+ * Sends an authenticated XHR.
+ * @param {!string} method The HTTP method to use (GET, POST, etc.).
+ * @param {!string} url The URL to send the request to.
+ * @param {!function(XMLHttpRequest)} callback The function to call when the request is complete.
+ * @param {string=} opt_responseType The type of the response property, defaults to string.
+ * @private
+ */
 Popup.prototype.sendXhr_ = function(method, url, callback, opt_responseType) {
   chrome.identity.getAuthToken({ 'interactive': true }, this.getAuthTokenCallback_.bind(this, method, url, callback, opt_responseType));
 };
 
-Popup.prototype.getAuthTokenCallback_ = function(method, url, callback, opt_responseType, token) {
+
+/**
+ * Sends an XHR with the given authentication token.
+ * @param {!string} method The HTTP method to use (GET, POST, etc.).
+ * @param {!string} url The URL to send the request to.
+ * @param {!function(XMLHttpRequest)} callback The function to call when the request is complete.
+ * @param {string|undefined} responseType The type of the response property, defaults to string.
+ * @param {string=} token The authentication token.
+ */
+Popup.prototype.getAuthTokenCallback_ = function(method, url, callback, responseType, token) {
   if (this.checkError_()) {
     return;
   }
@@ -53,6 +98,12 @@ Popup.prototype.getAuthTokenCallback_ = function(method, url, callback, opt_resp
   xhr.send();
 };
 
+
+/**
+ * Displays the files that match the types in keyfile name.
+ * @param {!XMLHttpRequest} request The XMLHttpRequest of the request to search for the keyfile.
+ * @private
+ */
 Popup.prototype.displayFiles_ = function(request) {
   var files = JSON.parse(request.responseText);
   var ul = document.getElementById('files');
@@ -73,7 +124,13 @@ Popup.prototype.displayFiles_ = function(request) {
   this.hideLoading_();
 };
 
-Popup.prototype.handleKeyFileClick_ = function(keyFileId) {
+
+/**
+ * Called on a click on a keyfile name, shows the password field for the keyfile.
+ * @param {string=} opt_keyFileId The ID of the keyfile.
+ * @private
+ */
+Popup.prototype.handleKeyFileClick_ = function(opt_keyFileId) {
   if (!keyFileId) {
     this.showError_('No key file ID');
     return;
@@ -85,6 +142,12 @@ Popup.prototype.handleKeyFileClick_ = function(keyFileId) {
   this.showMasterPassword_();
 };
 
+
+/**
+ * Called after typing the password and clicking OK. Commences fetching the keyfile, decrypting it, and display the contents.
+ * @param {!string} keyFileId The ID of the keyfile.
+ * @private
+ */
 Popup.prototype.handleMasterPasswordOkClick_ = function(keyFileId) {
   // If the 'invalid password' error is shown.
   this.hideError_();
@@ -93,12 +156,24 @@ Popup.prototype.handleMasterPasswordOkClick_ = function(keyFileId) {
   this.sendXhr_('GET', Popup.API_BASE + '/files/' + keyFileId, this.fetchKeyFile_.bind(this));
 };
 
+
+/**
+ * Actually fetches the keyfile after the API call to get the keyfile URL.
+ * @param {!XMLHttpRequest} request The XMLHttpRequest of the request to get the key file metadata.
+ * @private
+ */
 Popup.prototype.fetchKeyFile_ = function(request) {
   var file = JSON.parse(request.responseText);
   var downloadUrl = file['downloadUrl'];
   this.sendXhr_('GET', downloadUrl, this.processKeyFile_.bind(this), 'arraybuffer');
 };
 
+
+/**
+ * Decrypts and displays the keyfile.
+ * @param {!XMLHttpRequest} request The XMLHttpRequest of the request with the keyfile contents.
+ * @private
+ */
 Popup.prototype.processKeyFile_ = function(request) {
   this.showLoading_('Processing key file...');
   var password = document.getElementById('master-password').value;
@@ -112,6 +187,12 @@ Popup.prototype.processKeyFile_ = function(request) {
   this.showGroups_(file.rootGroup);
 };
 
+
+/**
+ * Displays the keyfile.
+ * @param {!Group} rootGroup The topmost group.
+ * @private
+ */
 Popup.prototype.showGroups_ = function(rootGroup) {
   var passwords = document.getElementById('passwords');
   passwords.style.display = 'initial';
@@ -122,6 +203,13 @@ Popup.prototype.showGroups_ = function(rootGroup) {
   passwords.appendChild(groups);
 };
 
+
+/**
+ * Creates a group element to display on the page.
+ * @param {!Group} group The group to create the element for.
+ * @return {!Element} The element.
+ * @private
+ */
 Popup.prototype.createGroupElement_ = function(group) {
   var groupElement = document.createElement('li');
   var title = document.createElement('h2');
@@ -141,6 +229,13 @@ Popup.prototype.createGroupElement_ = function(group) {
   return groupElement;
 };
 
+
+/**
+ * Creates an entry element to display on the page.
+ * @param {!Object.<string, string>} entry The entry to create the element for.
+ * @return {!Element} The element.
+ * @private
+ */
 Popup.prototype.createEntryElement_ = function(entry) {
   var entryElement = document.createElement('li');
   var title = document.createElement('h3');
@@ -164,6 +259,13 @@ Popup.prototype.createEntryElement_ = function(entry) {
   return entryElement;
 };
 
+
+/**
+ * Determines if the given entry should be displayed.
+ * @param {!Object.<string, string>} entry The entry.
+ * @return {boolean} True if the entry should be displayed, false otherwise.
+ * @private
+ */
 Popup.prototype.shouldDisplayEntry_ = function(entry) {
   return typeof entry.binary === 'undefined'
     || typeof entry.comment === 'undefined' || entry.comment === ''
@@ -174,20 +276,43 @@ Popup.prototype.shouldDisplayEntry_ = function(entry) {
     || entry.image != 0;
 };
 
+
+/**
+ * Shows the loading screen with the given message.
+ * @param {!string} message The loading message to display.
+ * @private
+ */
 Popup.prototype.showLoading_ = function(message) {
   document.getElementById('loading-message').textContent = message;
   document.getElementById('loading').style.display = 'initial';
 };
 
+
+/**
+ * Hides the loading screen.
+ * @private
+ */
 Popup.prototype.hideLoading_ = function() {
   document.getElementById('loading').style.display = 'none';
 };
 
+
+/**
+ * Shows the master password screen.
+ * @private
+ */
 Popup.prototype.showMasterPassword_ = function() {
   document.getElementById('master-password-enter').style.display = 'initial';
   document.getElementById('master-password').focus();
 };
 
+
+/**
+ * Sets the element with the given ID to call the given callback when the user presses enter.
+ * @param {!string} id The ID to set the callback on.
+ * @param {function()} callback The callback.
+ * @private
+ */
 Popup.prototype.onEnter_ = function(id, callback) {
   document.getElementById(id).addEventListener('keyup', function(event) {
     if (event.keyCode == 13) {
