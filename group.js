@@ -1,5 +1,5 @@
 /**
- * @fileoverview A group in a keefile.
+ * @fileoverview A group in a keyfile.
  */
 
 /**
