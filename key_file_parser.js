@@ -34,70 +34,71 @@ keepasschrome.KeyFileParser.prototype.parse = function(password) {
     return result;
   }
   var encryptedData = this.bytes_.readRestToWordArray();
-  var key = this.transformKey_(password, header['masterSeed'], header['masterSeed2'],
-      header['keyEncryptionRounds']);
+  var key = this.transformKey_(password, header.masterSeed, header.masterSeed2,
+      header.keyEncryptionRounds);
   var decryptedData;
   try {
-    decryptedData = this.decryptFile_(header['flags'], encryptedData, key, header['encryptionInitialValue'], header['contentsHash']);
+    decryptedData = this.decryptFile_(header.flags, encryptedData, key, header.encryptionInitialValue, header.contentsHash);
   } catch (e) {
     result['error'] = e.message;
     return result;
   }
   result['decryptedData'] = decryptedData;
   var rest = keepasschrome.BinaryReader.fromWordArray(decryptedData);
-  result['rootGroup'] = this.parseContents_(rest, header['groups'], header['entries']);
+  result['rootGroup'] = this.parseContents_(rest, header.groups, header.entries);
   return result;
 };
 
 
 /**
  * Parses the keyfile header.
- * @return {!Object} The parsed header.
+ * @return {!keepasschrome.KeyFileHeader} The parsed header.
  * @private
  */
 keepasschrome.KeyFileParser.prototype.parseHeader_ = function() {
-  return {
-    "signature1": this.bytes_.readInt(),
-    "signature2": this.bytes_.readInt(),
-    "flags": this.parseHeaderFlags_(),
-    "version": this.bytes_.readInt(),
-    "masterSeed": this.bytes_.readWordArray(16),
-    "encryptionInitialValue": this.bytes_.readWordArray(16),
-    "groups": this.bytes_.readInt(),
-    "entries": this.bytes_.readInt(),
-    "contentsHash": this.bytes_.readWordArray(32),
-    "masterSeed2": this.bytes_.readWordArray(32),
-    "keyEncryptionRounds": this.bytes_.readInt()
-  };
+  return new keepasschrome.KeyFileHeader(
+      this.bytes_.readInt() /* signature1 */,
+      this.bytes_.readInt() /* signature2 */,
+      this.parseHeaderFlags_() /* flags */,
+      this.bytes_.readInt() /* version */,
+      this.bytes_.readWordArray(16) /* masterSeed */,
+      this.bytes_.readWordArray(16) /* encryptionInitialValue */,
+      this.bytes_.readInt() /* groups */,
+      this.bytes_.readInt() /* entries */,
+      this.bytes_.readWordArray(32) /* contentsHash */,
+      this.bytes_.readWordArray(32) /* masterSeed2*/,
+      this.bytes_.readInt() /* keyEncryptionRounds */);
 };
 
 
 /**
  * Parses the header flags.
- * @return {!Object} The parsed header flags.
+ * @return {!keepasschrome.KeyFileHeader.Flags} The parsed header flags.
  * @private
  */
 keepasschrome.KeyFileParser.prototype.parseHeaderFlags_ = function() {
   var b = this.bytes_.readInt();
-  return {
-    "sha2": !!(b & 1),
-    "rijndael": !!(b & 2),
-    "arcfour": !!(b & 4),
-    "twofish": !!(b & 8)
-  };
+
+  var flags = new keepasschrome.KeyFileHeader.Flags();
+  flags.sha2 = !!(b & 1);
+  flags.rijndael = !!(b & 2);
+  flags.arcfour = !!(b & 4);
+  flags.twofish = !!(b & 8);
+
+  return flags;
 };
 
 
 /**
  * Verifies that the keyfile is the supported version.
- * @param {!Object} header The keyfile header.
+ * @param {!keepasschrome.KeyFileHeader} header The keyfile header.
  * @return {!boolean} True if the keyfile is the supported verison, false otherwise.
  * @private
  */
 keepasschrome.KeyFileParser.prototype.verifyVersion_ = function(header) {
-  return header['signature1'] == keepasschrome.KeyFileParser.DATABASE_SIGNATURE_1
-      && header['signature2'] == keepasschrome.KeyFileParser.DATABASE_SIGNATURE_2
-      && (header['version'] & keepasschrome.KeyFileParser.DATABASE_VERSION_MASK)
+  return header.signature1 == keepasschrome.KeyFileParser.DATABASE_SIGNATURE_1
+      && header.signature2 == keepasschrome.KeyFileParser.DATABASE_SIGNATURE_2
+      && (header.version & keepasschrome.KeyFileParser.DATABASE_VERSION_MASK)
           == (keepasschrome.KeyFileParser.DATABASE_VERSION & keepasschrome.KeyFileParser.DATABASE_VERSION_MASK);
 };
 
@@ -127,7 +128,7 @@ keepasschrome.KeyFileParser.prototype.transformKey_ = function(plainTextKey, mas
 
 /**
  * Decrypts the keyfile.
- * @param {!Object} headerFlags The header flags.
+ * @param {!keepasschrome.KeyFileHeader.Flags} headerFlags The header flags.
  * @param {!CryptoJS.lib.WordArray} encryptedData The encrypted part of the keyfile.
  * @param {!CryptoJS.lib.WordArray} key The key to decrypt the keyfile.
  * @param {!CryptoJS.lib.WordArray} encryptionInitialValue The IV key from the header.
@@ -146,9 +147,9 @@ keepasschrome.KeyFileParser.prototype.decryptFile_ = function(headerFlags, encry
     "padding": CryptoJS.pad.Pkcs7
   };
   var decryptedData;
-  if (headerFlags['rijndael']) {
+  if (headerFlags.rijndael) {
     decryptedData = this.decryptAes_(cipherParams, key, cfg);
-  } else if (headerFlags['twofish']) {
+  } else if (headerFlags.twofish) {
     decryptedData = this.decryptTwoFish_(cipherParams, key, cfg);
   } else {
     throw new Error("Invalid encryption type");
