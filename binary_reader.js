@@ -122,8 +122,9 @@ keepasschrome.BinaryReader.prototype.readInt = function() {
 
 /**
  * @return {!number} The word.
+ * @private
  */
-keepasschrome.BinaryReader.prototype.readWord = function() {
+keepasschrome.BinaryReader.prototype.readWord_ = function() {
   var bytes = this.readBytes(4);
   var result = 0;
   for (var i = 0; i < bytes.length; i++) {
@@ -140,7 +141,7 @@ keepasschrome.BinaryReader.prototype.readWord = function() {
 keepasschrome.BinaryReader.prototype.readWordArray = function(num) {
   var words = [];
   while (num > 0) {
-    words.push(this.readWord());
+    words.push(this.readWord_());
     num -= 4;
   }
   return CryptoJS.lib.WordArray.create(words);
@@ -154,7 +155,7 @@ keepasschrome.BinaryReader.prototype.readRestToWordArray = function() {
   var restOfFile = [];
   var numBytes = 0;
   while (this.hasNextInt()) {
-    restOfFile.push(this.readWord());
+    restOfFile.push(this.readWord_());
     numBytes += 4;
   }
   return CryptoJS.lib.WordArray.create(restOfFile, numBytes);
