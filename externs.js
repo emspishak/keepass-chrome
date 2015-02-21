@@ -7,7 +7,7 @@ CryptoJS.AES = {};
 /**
  * @param {!CryptoJS.lib.CipherParams} ciphertext
  * @param {!CryptoJS.lib.WordArray} key
- * @param {Object} cfg
+ * @param {!Object} cfg
  * @return {!CryptoJS.lib.WordArray}
  */
 CryptoJS.AES.decrypt = function(ciphertext, key, cfg) {};
@@ -44,7 +44,7 @@ CryptoJS.lib.WordArray = function() {};
 
 
 /**
- * @param {Array} words
+ * @param {!Array} words
  * @param {number=} opt_sigBytes
  */
 CryptoJS.lib.WordArray.create = function(words, opt_sigBytes) {};
@@ -91,7 +91,7 @@ CryptoJS.pad.Pkcs7;
 
 
 /**
- * @param {!string|!CryptoJS.lib.WordArray} message
+ * @param {string|!CryptoJS.lib.WordArray} message
  * @return {!CryptoJS.lib.WordArray}
  */
 CryptoJS.SHA256 = function(message) {};
@@ -103,7 +103,7 @@ CryptoJS.TwoFish = {};
 /**
  * @param {!CryptoJS.lib.CipherParams} ciphertext
  * @param {!CryptoJS.lib.WordArray} key
- * @param {Object} cfg
+ * @param {!Object} cfg
  * @return {!CryptoJS.lib.WordArray}
  */
 CryptoJS.TwoFish.decrypt = function(ciphertext, key, cfg) {};

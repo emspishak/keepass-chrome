@@ -3,24 +3,27 @@
  */
 
 /**
- * @param {!number} id The group's ID.
- * @param {!string} title The title of the group.
- * @param {!number} image The group's image.
+ * @param {number} id The group's ID.
+ * @param {string} title The title of the group.
+ * @param {number} image The group's image.
  * @constructor
  */
 keepasschrome.Group = function(id, title, image) {
 
   /**
+   * @type {number}
    * @private
    */
   this.id_ = id;
 
   /**
+   * @type {string}
    * @private
    */
   this.title_ = title;
 
   /**
+   * @type {number}
    * @private
    */
   this.image_ = image;
@@ -32,7 +35,7 @@ keepasschrome.Group = function(id, title, image) {
   this.parent_ = null;
 
   /**
-   * @type {!number}
+   * @type {number}
    * @private
    */
   this.index_ = -1;
@@ -52,7 +55,7 @@ keepasschrome.Group = function(id, title, image) {
 
 
 /**
- * @return {!number} The ID.
+ * @return {number} The ID.
  */
 keepasschrome.Group.prototype.getId = function() {
   return this.id_;
@@ -60,7 +63,7 @@ keepasschrome.Group.prototype.getId = function() {
 
 
 /**
- * @return {!string} The title.
+ * @return {string} The title.
  */
 keepasschrome.Group.prototype.getTitle = function() {
   return this.title_;
@@ -68,7 +71,7 @@ keepasschrome.Group.prototype.getTitle = function() {
 
 
 /**
- * @return {!number} The image.
+ * @return {number} The image.
  */
 keepasschrome.Group.prototype.getImage = function() {
   return this.image_;
@@ -86,7 +89,7 @@ keepasschrome.Group.prototype.addChild = function(child) {
 
 
 /**
- * @param {!number} index The index of the child to get.
+ * @param {number} index The index of the child to get.
  * @return {!keepasschrome.Group} The child group at the given index.
  */
 keepasschrome.Group.prototype.getChild = function(index) {

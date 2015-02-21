@@ -17,7 +17,7 @@ keepasschrome.KeyFileParser = function(arraybuffer) {
 
 /**
  * Parses the keyfile with the given password.
- * @param {!string} password The password to decrypt the keyfile.
+ * @param {string} password The password to decrypt the keyfile.
  * @return {!keepasschrome.Group} The top group of the keyfile.
  */
 keepasschrome.KeyFileParser.prototype.parse = function(password) {
@@ -77,7 +77,7 @@ keepasschrome.KeyFileParser.prototype.parseHeaderFlags_ = function() {
 /**
  * Verifies that the keyfile is the supported version.
  * @param {!keepasschrome.KeyFileHeader} header The keyfile header.
- * @return {!boolean} True if the keyfile is the supported verison, false
+ * @return {boolean} True if the keyfile is the supported verison, false
  *     otherwise.
  * @private
  */
@@ -92,12 +92,12 @@ keepasschrome.KeyFileParser.prototype.verifyVersion_ = function(header) {
 
 /**
  * Transforms the password into the key used to decrypt the keyfile.
- * @param {!string} plainTextKey The password to decrypt the keyfile.
+ * @param {string} plainTextKey The password to decrypt the keyfile.
  * @param {!CryptoJS.lib.WordArray} masterSeed The master seed from the keyfile
  *     header.
  * @param {!CryptoJS.lib.WordArray} masterSeed2 The second master seed from the
  *     keyfile header.
- * @param {!number} keyEncryptionRounds The number of rounds needed to decrypt.
+ * @param {number} keyEncryptionRounds The number of rounds needed to decrypt.
  * @return {!CryptoJS.lib.WordArray} The key to decrypt the keyfile.
  * @private
  */
@@ -192,8 +192,8 @@ keepasschrome.KeyFileParser.prototype.decryptTwoFish_ = function(cipherParams,
 /**
  * Parses the decryped key file.
  * @param {!keepasschrome.BinaryReader} contents The decrypted key file.
- * @param {!number} numGroups The number of groups in the key file.
- * @param {!number} numEntries The number of entries in the key file.
+ * @param {number} numGroups The number of groups in the key file.
+ * @param {number} numEntries The number of entries in the key file.
  * @return {!keepasschrome.Group} The top group of the key file.
  * @private
  */
@@ -220,7 +220,7 @@ keepasschrome.KeyFileParser.prototype.parseContents_ = function(contents,
 /**
  * Reads in a group from the decrypted key file.
  * @param {!keepasschrome.BinaryReader} contents The decrypted key file.
- * @param {!Array.<!number>} levels A list of the levels.
+ * @param {!Array.<number>} levels A list of the levels.
  * @return {!keepasschrome.Group} the parsed group.
  * @private
  */
@@ -334,7 +334,7 @@ keepasschrome.KeyFileParser.prototype.readEntry_ = function(contents) {
 
 /**
  * Builds the groups into a tree.
- * @param {!Array.<!number>} levels A list of the levels.
+ * @param {!Array.<number>} levels A list of the levels.
  * @param {!Array.<!keepasschrome.Group>} groups The groups.
  * @param {!keepasschrome.Group} rootGroup The top group.
  * @private
@@ -356,9 +356,9 @@ keepasschrome.KeyFileParser.prototype.createGroupTree_ = function(levels,
 
 /**
  * Finds the index in the levels for the parent group of the current group.
- * @param {!number} currentGroupIndex The index of the current group.
- * @param {!Array.<!number>} levels A list of the levels.
- * @return {!number} The index in the levels of the parent group.
+ * @param {number} currentGroupIndex The index of the current group.
+ * @param {!Array.<number>} levels A list of the levels.
+ * @return {number} The index in the levels of the parent group.
  * @private
  */
 keepasschrome.KeyFileParser.prototype.findParentGroupIndex_ = function(

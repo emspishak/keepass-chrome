@@ -26,7 +26,7 @@ keepasschrome.Popup.prototype.start = function() {
 
 
 /**
- * @param {!string} message The error message to show.
+ * @param {string} message The error message to show.
  * @private
  */
 keepasschrome.Popup.prototype.showError_ = function(message) {
@@ -44,7 +44,7 @@ keepasschrome.Popup.prototype.hideError_ = function() {
 
 /**
  * Shows the last API error, if there was one.
- * @return {!boolean} True if the last API call resulted in an error, false
+ * @return {boolean} True if the last API call resulted in an error, false
  *     otherwise.
  * @private
  */
@@ -72,9 +72,9 @@ keepasschrome.Popup.prototype.searchForKeyFile_ = function() {
 
 /**
  * Sends an authenticated XHR.
- * @param {!string} method The HTTP method to use (GET, POST, etc.).
- * @param {!string} url The URL to send the request to.
- * @param {!function(!XMLHttpRequest)} callback The function to call when the
+ * @param {string} method The HTTP method to use (GET, POST, etc.).
+ * @param {string} url The URL to send the request to.
+ * @param {function(!XMLHttpRequest)} callback The function to call when the
  *     request is complete.
  * @param {string=} opt_responseType The type of the response property, defaults
  *     to string.
@@ -90,18 +90,21 @@ keepasschrome.Popup.prototype.sendXhr_ = function(method, url, callback,
 
 /**
  * Sends an XHR with the given authentication token.
- * @param {!string} method The HTTP method to use (GET, POST, etc.).
- * @param {!string} url The URL to send the request to.
- * @param {!function(!XMLHttpRequest)} callback The function to call when the
+ * @param {string} method The HTTP method to use (GET, POST, etc.).
+ * @param {string} url The URL to send the request to.
+ * @param {function(!XMLHttpRequest)} callback The function to call when the
  *     request is complete.
  * @param {string|undefined} responseType The type of the response property,
  *     defaults to string.
- * @param {string=} token The authentication token.
+ * @param {string=} opt_token The authentication token.
  * @private
  */
 keepasschrome.Popup.prototype.getAuthTokenCallback_ = function(method, url,
-    callback, responseType, token) {
+    callback, responseType, opt_token) {
   if (this.checkError_()) {
+    return;
+  } else if (!opt_token) {
+    this.showError_('Got undefined auth token.');
     return;
   }
   var xhr = new XMLHttpRequest();
@@ -109,7 +112,7 @@ keepasschrome.Popup.prototype.getAuthTokenCallback_ = function(method, url,
   if (responseType) {
     xhr.responseType = responseType;
   }
-  xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + opt_token);
   xhr.onload = function() {
     callback(this);
   };
@@ -168,7 +171,7 @@ keepasschrome.Popup.prototype.handleKeyFileClick_ = function(opt_keyFileId) {
 /**
  * Called after typing the password and clicking OK. Commences fetching the
  * keyfile, decrypting it, and display the contents.
- * @param {!string} keyFileId The ID of the keyfile.
+ * @param {string} keyFileId The ID of the keyfile.
  * @private
  */
 keepasschrome.Popup.prototype.handleMasterPasswordOkClick_ =
@@ -301,7 +304,7 @@ keepasschrome.Popup.prototype.createEntryElement_ = function(entry) {
 /**
  * Determines if the given entry should be displayed.
  * @param {!keepasschrome.Entry} entry The entry.
- * @return {!boolean} True if the entry should be displayed, false otherwise.
+ * @return {boolean} True if the entry should be displayed, false otherwise.
  * @private
  */
 keepasschrome.Popup.prototype.shouldDisplayEntry_ = function(entry) {
@@ -317,7 +320,7 @@ keepasschrome.Popup.prototype.shouldDisplayEntry_ = function(entry) {
 
 /**
  * Shows the loading screen with the given message.
- * @param {!string} message The loading message to display.
+ * @param {string} message The loading message to display.
  * @private
  */
 keepasschrome.Popup.prototype.showLoading_ = function(message) {
@@ -348,8 +351,8 @@ keepasschrome.Popup.prototype.showMasterPassword_ = function() {
 /**
  * Sets the element with the given ID to call the given callback when the user
  * presses enter.
- * @param {!string} id The ID to set the callback on.
- * @param {!function()} callback The callback.
+ * @param {string} id The ID to set the callback on.
+ * @param {function()} callback The callback.
  * @private
  */
 keepasschrome.Popup.prototype.onEnter_ = function(id, callback) {

@@ -8,83 +8,51 @@
  */
 keepasschrome.Entry = function() {
 
-  /**
-   * @type {Array.<!number>}
-   */
+  /** @type {Array.<number>} */
   this.uuid;
 
-  /**
-   * @type {number}
-   */
+  /** @type {number} */
   this.groupId;
 
-  /**
-   * @type {number}
-   */
+  /** @type {number} */
   this.image;
 
-  /**
-   * @type {string}
-   */
+  /** @type {string} */
   this.title;
 
-  /**
-   * @type {string}
-   */
+  /** @type {string} */
   this.url;
 
-  /**
-   * @type {string}
-   */
+  /** @type {string} */
   this.username;
 
-  /**
-   * @type {string}
-   */
+  /** @type {string} */
   this.password;
 
-  /**
-   * @type {string}
-   */
+  /** @type {string} */
   this.comment;
 
-  /**
-   * @type {Date}
-   */
+  /** @type {Date} */
   this.creation;
 
-  /**
-   * @type {Date}
-   */
+  /** @type {Date} */
   this.lastModified;
 
-  /**
-   * @type {Date}
-   */
+  /** @type {Date} */
   this.lastAccessed;
 
-  /**
-   * @type {Date}
-   */
+  /** @type {Date} */
   this.expires;
 
-  /**
-   * @type {string}
-   */
+  /** @type {string} */
   this.binaryDesc;
 
-  /**
-   * @type {Array.<!number>}
-   */
+  /** @type {Array.<number>} */
   this.binary;
 
-  /**
-   * @type {keepasschrome.Group}
-   */
+  /** @type {keepasschrome.Group} */
   this.group;
 
-  /**
-   * @type {number}
-   */
+  /** @type {number} */
   this.index;
 };
