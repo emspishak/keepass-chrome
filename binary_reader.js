@@ -67,8 +67,9 @@ keepasschrome.BinaryReader.prototype.hasNextInt = function() {
 
 /**
  * @return {!number} The next byte.
+ * @private
  */
-keepasschrome.BinaryReader.prototype.readByte = function() {
+keepasschrome.BinaryReader.prototype.readByte_ = function() {
   if (!this.hasNextByte()) {
     throw new RangeError();
   }
@@ -83,7 +84,7 @@ keepasschrome.BinaryReader.prototype.readByte = function() {
 keepasschrome.BinaryReader.prototype.readBytes = function(num) {
   var bytes = [];
   for (var i = 0; i < num; i++) {
-    bytes.push(this.readByte());
+    bytes.push(this.readByte_());
   }
   return bytes;
 };
@@ -168,10 +169,10 @@ keepasschrome.BinaryReader.prototype.readRestToWordArray = function() {
  */
 keepasschrome.BinaryReader.prototype.readString = function() {
   var result = '';
-  var b = this.readByte();
+  var b = this.readByte_();
   while (b != 0) {
     result += String.fromCharCode(b);
-    b = this.readByte();
+    b = this.readByte_();
   }
   return result;
 };
