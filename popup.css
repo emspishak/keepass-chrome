@@ -17,3 +17,17 @@ body {
 #passwords {
   display: none ;
 }
+
+.decrypt-progress-bar {
+  display: block;
+  height: 20px;
+  border: 1px solid gray;
+  padding: 2px;
+}
+
+.decrypt-progress-bar-inner {
+  display: block;
+  width: 0;
+  background-color: black;
+  height: 100%;
+}

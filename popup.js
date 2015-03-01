@@ -216,7 +216,12 @@ keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
     return;
   }
   var rootGroup;
-  new keepasschrome.KeyFileParser(response).parse(password).then(
+  var progressBar = new keepasschrome.DecryptProgressBar();
+  var loadingElement = document.getElementById('loading');
+  if (loadingElement) {
+    progressBar.render(loadingElement);
+  }
+  new keepasschrome.KeyFileParser(response).parse(password, progressBar).then(
     function(rootGroup) {
         this.showGroups_(rootGroup);
         this.hideLoading_();

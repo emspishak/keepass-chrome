@@ -7,7 +7,18 @@
  * @constructor
  */
 keepasschrome.KeyFileParser = function(arraybuffer) {
+
+  /**
+   * @type {!keepasschrome.BinaryReader}
+   * @private
+   */
   this.bytes_ = new keepasschrome.BinaryReader(arraybuffer);
+
+  /**
+   * @type {!keepasschrome.DecryptProgressBar}
+   * @private
+   */
+  this.progressBar_;
 };
 /** @const */ keepasschrome.KeyFileParser.DATABASE_SIGNATURE_1 = 2594363651;
 /** @const */ keepasschrome.KeyFileParser.DATABASE_SIGNATURE_2 = 3041655653;
@@ -20,14 +31,18 @@ keepasschrome.KeyFileParser = function(arraybuffer) {
 /**
  * Parses the keyfile with the given password.
  * @param {string} password The password to decrypt the keyfile.
+ * @param {!keepasschrome.DecryptProgressBar} progressBar A progress bar to show
+ *     the decryption status.
  * @return {!Promise.<!keepasschrome.Group>} A promise that resolves to the top
  *     group of the keyfile.
  */
-keepasschrome.KeyFileParser.prototype.parse = function(password) {
+keepasschrome.KeyFileParser.prototype.parse = function(password, progressBar) {
+  this.progressBar_ = progressBar;
   var header = this.parseHeader_();
   if (!this.verifyVersion_(header)) {
     throw new Error('Invalid key file version');
   }
+  this.progressBar_.setTotalEncryptionRounds(header.keyEncryptionRounds);
   var encryptedData = this.bytes_.readRest();
   return this.transformKey_(password, header.masterSeed,
           header.masterSeed2, header.keyEncryptionRounds)
@@ -207,8 +222,9 @@ keepasschrome.KeyFileParser.prototype.encryptKey_ = function(params) {
           combinedView.set(firstHalf);
           combinedView.set(secondHalf, Constants.ECB_BLOCK_SIZE);
           params.encryptedKey = combined;
+          this.progressBar_.encryptionRoundComplete();
           return params;
-      });
+      }.bind(this));
 };
 
 
