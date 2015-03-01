@@ -4,7 +4,10 @@ FILES="popup.js key_file_parser.js binary_reader.js entry.js group.js key_file_h
 CHROME_EXTERNS="https://raw.githubusercontent.com/google/closure-compiler/master/contrib/externs/chrome_extensions.js"
 # Temporary until new Closure Compiler release.
 ENCODING_EXTERNS="https://raw.githubusercontent.com/google/closure-compiler/master/externs/w3c_encoding.js"
-OUTPUT="output/keepass-chrome.js"
+OUTPUT_DIR="output"
+OUTPUT="$OUTPUT_DIR/keepass-chrome.js"
+
+mkdir -p $OUTPUT_DIR
 
 gjslint *.js
 closure-compiler \
