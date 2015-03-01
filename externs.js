@@ -1,109 +1,47 @@
-var CryptoJS = {};
-
-
-CryptoJS.AES = {};
-
-
-/**
- * @param {!CryptoJS.lib.CipherParams} ciphertext
- * @param {!CryptoJS.lib.WordArray} key
- * @param {!Object} cfg
- * @return {!CryptoJS.lib.WordArray}
- */
-CryptoJS.AES.decrypt = function(ciphertext, key, cfg) {};
-
-
-/**
- * @param {!CryptoJS.lib.WordArray} message
- * @param {!CryptoJS.lib.WordArray} key
- * @param {!Object} cfg
- * @return {!CryptoJS.lib.CipherParams}
- */
-CryptoJS.AES.encrypt = function(message, key, cfg) {};
-
-
-CryptoJS.lib = {};
-
-
 /**
  * @constructor
  */
-CryptoJS.lib.CipherParams = function() {};
+var CryptoKey = function() {};
+
+
+var crypto = {};
+
+
+crypto.subtle = {};
+
+/**
+ * @param {!Object} algoParams
+ * @param {!CryptoKey} cryptoKey
+ * @param {!ArrayBuffer|!ArrayBufferView} cipherText
+ * @return {!Promise.<!ArrayBuffer>}
+ */
+crypto.subtle.decrypt = function(algoParams, cryptoKey, cipherText) {};
 
 
 /**
- * @type {!CryptoJS.lib.WordArray}
+ * @param {!Object} algoParams
+ * @param {!ArrayBuffer|!ArrayBufferView} textToHash
+ * @return {!Promise.<!ArrayBuffer>}
  */
-CryptoJS.lib.CipherParams.prototype.ciphertext;
+crypto.subtle.digest = function(algoParams, textToHash) {};
 
 
 /**
- * @constructor
+ * @param {!Object} algoParams
+ * @param {!CryptoKey} cryptoKey
+ * @param {!ArrayBuffer|!ArrayBufferView} clearText
+ * @return {!Promise.<!ArrayBuffer>}
  */
-CryptoJS.lib.WordArray = function() {};
+crypto.subtle.encrypt = function(algoParams, cryptoKey, clearText) {};
 
 
 /**
- * @param {!Array} words
- * @param {number=} opt_sigBytes
+ * @param {string} format
+ * @param {!ArrayBuffer|!ArrayBufferView} keyData
+ * @param {!Object} algoParams
+ * @param {boolean} extractable
+ * @param {!Array.<string>} usages
+ * @return {!Promise.<!CryptoKey>}
  */
-CryptoJS.lib.WordArray.create = function(words, opt_sigBytes) {};
-
-
-/**
- * @type {number}
- */
-CryptoJS.lib.WordArray.prototype.sigBytes;
-
-
-/**
- * @type {Array}
- */
-CryptoJS.lib.WordArray.prototype.words;
-
-
-CryptoJS.lib.WordArray.prototype.clamp = function() {};
-
-
-/**
- * @param {!CryptoJS.lib.WordArray} wordArray
- * @return {!CryptoJS.lib.WordArray}
- */
-CryptoJS.lib.WordArray.prototype.concat = function(wordArray) {};
-
-
-CryptoJS.mode = {};
-
-
-CryptoJS.mode.CBC;
-
-
-CryptoJS.mode.ECB;
-
-
-CryptoJS.pad = {};
-
-
-CryptoJS.pad.NoPadding;
-
-
-CryptoJS.pad.Pkcs7;
-
-
-/**
- * @param {string|!CryptoJS.lib.WordArray} message
- * @return {!CryptoJS.lib.WordArray}
- */
-CryptoJS.SHA256 = function(message) {};
-
-
-CryptoJS.TwoFish = {};
-
-
-/**
- * @param {!CryptoJS.lib.CipherParams} ciphertext
- * @param {!CryptoJS.lib.WordArray} key
- * @param {!Object} cfg
- * @return {!CryptoJS.lib.WordArray}
- */
-CryptoJS.TwoFish.decrypt = function(ciphertext, key, cfg) {};
+crypto.subtle.importKey = function(format, keyData, algoParams, extractable,
+    usages) {};

@@ -216,16 +216,20 @@ keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
     return;
   }
   var rootGroup;
-  try {
-    rootGroup = new keepasschrome.KeyFileParser(response).parse(password);
-  } catch (e) {
-    this.showError_(e.message);
-    this.showMasterPassword_();
-    return;
-  } finally {
-    this.hideLoading_();
-  }
-  this.showGroups_(rootGroup);
+  new keepasschrome.KeyFileParser(response).parse(password).then(
+    function(rootGroup) {
+        this.showGroups_(rootGroup);
+        this.hideLoading_();
+    }.bind(this),
+    function(e) {
+        if (e.message) {
+          this.showError_(e.message);
+        } else {
+          this.showError_('Error decrypting, the password is probably wrong.');
+        }
+        this.showMasterPassword_();
+        this.hideLoading_();
+    }.bind(this));
 };
 
 

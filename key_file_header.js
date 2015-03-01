@@ -7,12 +7,12 @@
  * @param {number} signature2
  * @param {!keepasschrome.KeyFileHeader.Flags} flags
  * @param {number} version
- * @param {!CryptoJS.lib.WordArray} masterSeed
- * @param {!CryptoJS.lib.WordArray} encryptionInitialValue
+ * @param {!Uint8Array} masterSeed
+ * @param {!Uint8Array} encryptionInitialValue
  * @param {number} groups
  * @param {number} entries
- * @param {!CryptoJS.lib.WordArray} contentsHash
- * @param {!CryptoJS.lib.WordArray} masterSeed2
+ * @param {!Uint8Array} contentsHash
+ * @param {!Uint8Array} masterSeed2
  * @param {number} keyEncryptionRounds
  * @constructor
  * @struct
@@ -33,10 +33,10 @@ keepasschrome.KeyFileHeader = function(
   /** @type {number} */
   this.version = version;
 
-  /** @type {!CryptoJS.lib.WordArray} */
+  /** @type {!Uint8Array} */
   this.masterSeed = masterSeed;
 
-  /** @type {!CryptoJS.lib.WordArray} */
+  /** @type {!Uint8Array} */
   this.encryptionInitialValue = encryptionInitialValue;
 
   /** @type {number} */
@@ -45,10 +45,10 @@ keepasschrome.KeyFileHeader = function(
   /** @type {number} */
   this.entries = entries;
 
-  /** @type {!CryptoJS.lib.WordArray} */
+  /** @type {!Uint8Array} */
   this.contentsHash = contentsHash;
 
-  /** @type {!CryptoJS.lib.WordArray} */
+  /** @type {!Uint8Array} */
   this.masterSeed2 = masterSeed2;
 
   /** @type {number} */

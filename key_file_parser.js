@@ -13,25 +13,27 @@ keepasschrome.KeyFileParser = function(arraybuffer) {
 /** @const */ keepasschrome.KeyFileParser.DATABASE_SIGNATURE_2 = 3041655653;
 /** @const */ keepasschrome.KeyFileParser.DATABASE_VERSION = 196612;
 /** @const */ keepasschrome.KeyFileParser.DATABASE_VERSION_MASK = 4294967040;
+/** @const */ keepasschrome.KeyFileParser.ECB_BLOCK_SIZE = 16;
+/** @const */ keepasschrome.KeyFileParser.SHA256_HASH_LENGTH = 32;
 
 
 /**
  * Parses the keyfile with the given password.
  * @param {string} password The password to decrypt the keyfile.
- * @return {!keepasschrome.Group} The top group of the keyfile.
+ * @return {!Promise.<!keepasschrome.Group>} A promise that resolves to the top
+ *     group of the keyfile.
  */
 keepasschrome.KeyFileParser.prototype.parse = function(password) {
   var header = this.parseHeader_();
   if (!this.verifyVersion_(header)) {
     throw new Error('Invalid key file version');
   }
-  var encryptedData = this.bytes_.readRestToWordArray();
-  var key = this.transformKey_(password, header.masterSeed, header.masterSeed2,
-      header.keyEncryptionRounds);
-  var decryptedData = this.decryptFile_(header.flags, encryptedData, key,
-      header.encryptionInitialValue, header.contentsHash);
-  var rest = keepasschrome.BinaryReader.fromWordArray(decryptedData);
-  return this.parseContents_(rest, header.groups, header.entries);
+  var encryptedData = this.bytes_.readRest();
+  return this.transformKey_(password, header.masterSeed,
+          header.masterSeed2, header.keyEncryptionRounds)
+      .then(this.decryptFile_.bind(this, header.flags, encryptedData,
+          header.encryptionInitialValue, header.contentsHash))
+      .then(this.parseContents_.bind(this, header.groups, header.entries));
 };
 
 
@@ -46,12 +48,12 @@ keepasschrome.KeyFileParser.prototype.parseHeader_ = function() {
       this.bytes_.readInt() /* signature2 */,
       this.parseHeaderFlags_() /* flags */,
       this.bytes_.readInt() /* version */,
-      this.bytes_.readWordArray(16) /* masterSeed */,
-      this.bytes_.readWordArray(16) /* encryptionInitialValue */,
+      this.bytes_.readBytes(16) /* masterSeed */,
+      this.bytes_.readBytes(16) /* encryptionInitialValue */,
       this.bytes_.readInt() /* groups */,
       this.bytes_.readInt() /* entries */,
-      this.bytes_.readWordArray(32) /* contentsHash */,
-      this.bytes_.readWordArray(32) /* masterSeed2*/,
+      this.bytes_.readBytes(32) /* contentsHash */,
+      this.bytes_.readBytes(32) /* masterSeed2*/,
       this.bytes_.readInt() /* keyEncryptionRounds */);
 };
 
@@ -93,112 +95,278 @@ keepasschrome.KeyFileParser.prototype.verifyVersion_ = function(header) {
 /**
  * Transforms the password into the key used to decrypt the keyfile.
  * @param {string} plainTextKey The password to decrypt the keyfile.
- * @param {!CryptoJS.lib.WordArray} masterSeed The master seed from the keyfile
- *     header.
- * @param {!CryptoJS.lib.WordArray} masterSeed2 The second master seed from the
+ * @param {!Uint8Array} masterSeed The master seed from the keyfile header.
+ * @param {!Uint8Array} masterSeed2 The second master seed from the
  *     keyfile header.
  * @param {number} keyEncryptionRounds The number of rounds needed to decrypt.
- * @return {!CryptoJS.lib.WordArray} The key to decrypt the keyfile.
+ * @return {!Promise<!ArrayBuffer>} A promise that resolves to the key to
+ *     decrypt the keyfile.
  * @private
  */
 keepasschrome.KeyFileParser.prototype.transformKey_ = function(plainTextKey,
     masterSeed, masterSeed2, keyEncryptionRounds) {
-  var hashedKey = CryptoJS.SHA256(plainTextKey);
-  var encrypted = hashedKey;
-  var cfg = {
-    'mode': CryptoJS.mode.ECB,
-    'padding': CryptoJS.pad.NoPadding
-  };
-  for (var i = 0; i < keyEncryptionRounds; i++) {
-    encrypted = CryptoJS.AES.encrypt(encrypted, masterSeed2, cfg).ciphertext;
+  var zeroIv = new Uint8Array(
+      new ArrayBuffer(keepasschrome.KeyFileParser.ECB_BLOCK_SIZE));
+  for (var i = 0; i < keepasschrome.KeyFileParser.ECB_BLOCK_SIZE; i++) {
+    zeroIv[i] = 0;
   }
-  return CryptoJS.SHA256(masterSeed.concat(CryptoJS.SHA256(encrypted)));
+  var params = new keepasschrome.TransformKeyParams(
+      plainTextKey, masterSeed, masterSeed2, zeroIv);
+  var transformKey = Promise.resolve(params)
+      .then(this.hashKey_.bind(this))
+      .then(this.generateCryptoKey_.bind(this));
+  for (var i = 0; i < keyEncryptionRounds; i++) {
+    transformKey = transformKey.then(this.encryptKey_.bind(this));
+  }
+  return transformKey
+      .then(function(params) {
+          return params.encryptedKey;
+      })
+      .then(this.hash_.bind(this))
+      .then(function(hashedKey) {
+          var masterSeedAndKey = new Uint8Array(masterSeed.byteLength +
+              hashedKey.byteLength);
+          masterSeedAndKey.set(masterSeed);
+          masterSeedAndKey.set(new Uint8Array(hashedKey),
+              masterSeed.byteLength);
+          return masterSeedAndKey.buffer;
+      })
+      .then(this.hash_.bind(this));
+};
+
+
+/**
+ * Hashes the plain text key.
+ * @param {!keepasschrome.TransformKeyParams} params The transform key params.
+ * @return {!Promise.<!keepasschrome.TransformKeyParams>} The transform key
+ *     params with the hashed plain text key.
+ * @private
+ */
+keepasschrome.KeyFileParser.prototype.hashKey_ = function(params) {
+  var encodedKey = new TextEncoder().encode(params.plainTextKey);
+  return this.hash_(encodedKey).then(
+      function(hashedKey) {
+          params.encryptedKey = hashedKey;
+          return params;
+      });
+};
+
+
+/**
+ * Hashes the given array buffer.
+ * @param {!ArrayBuffer|!ArrayBufferView} arrayBuffer The array buffer to hash.
+ * @return {!Promise.<!ArrayBuffer>} A promise that resolves to the hashed
+ *     input.
+ * @private
+ */
+keepasschrome.KeyFileParser.prototype.hash_ = function(arrayBuffer) {
+  return crypto.subtle.digest({'name': 'SHA-256'}, arrayBuffer);
+};
+
+
+/**
+ * Generates the crypto key to encrypt the key.
+ * @param {!keepasschrome.TransformKeyParams} params The transform key params.
+ * @return {!Promise.<!keepasschrome.TransformKeyParams>} The transform key
+ *     params with the crypto key.
+ * @private
+ */
+keepasschrome.KeyFileParser.prototype.generateCryptoKey_ = function(params) {
+  var algoParams = {
+    'name': 'AES-CBC',
+    'iv': params.initialValue
+  };
+  return crypto.subtle.importKey(
+      'raw', params.masterSeed2, algoParams, false, ['encrypt'])
+          .then(function(cryptoKey) {
+              params.cryptoKey = cryptoKey;
+              return params;
+          });
+};
+
+
+/**
+ * AES-ECB encrypts the key once. WebCrypto doesn't support AES-ECB encryption
+ * (it's not secure) so this uses AES-CBC encryption as described at
+ * http://crypto.stackexchange.com/a/21050 to get AES-EBC encryption.
+ * @param {!keepasschrome.TransformKeyParams} params The transform key params.
+ * @return {!Promise.<!keepasschrome.TransformKeyParams>}
+ * @private
+ */
+keepasschrome.KeyFileParser.prototype.encryptKey_ = function(params) {
+  var Constants = keepasschrome.KeyFileParser;
+  return Promise.all([
+          this.encryptPartialKey_(params, 0),
+          this.encryptPartialKey_(params, Constants.ECB_BLOCK_SIZE)])
+      .then(function(partialKeys) {
+          var firstHalf = partialKeys[0];
+          var secondHalf = partialKeys[1];
+
+          var combined = new ArrayBuffer(Constants.SHA256_HASH_LENGTH);
+          var combinedView = new Uint8Array(combined);
+          combinedView.set(firstHalf);
+          combinedView.set(secondHalf, Constants.ECB_BLOCK_SIZE);
+          params.encryptedKey = combined;
+          return params;
+      });
+};
+
+
+/**
+ * AES-ECB encrypts a single block (16 bytes).
+ * @param {!keepasschrome.TransformKeyParams} params The transform key params.
+ * @param {number} startIndex The starting index of the block to encrypt.
+ * @return {!Promise.<!Uint8Array>} The encrypted block.
+ * @private
+ */
+keepasschrome.KeyFileParser.prototype.encryptPartialKey_ = function(params,
+    startIndex) {
+  var algoParams = {
+    'name': 'AES-CBC',
+    'iv': params.initialValue
+  };
+  var blockToEncrypt = new Uint8Array(params.encryptedKey)
+      .subarray(startIndex,
+          startIndex + keepasschrome.KeyFileParser.ECB_BLOCK_SIZE);
+  return crypto.subtle.encrypt(algoParams, params.cryptoKey, blockToEncrypt)
+      .then(function(encryptedBlock) {
+          return new Uint8Array(encryptedBlock)
+              .subarray(0, keepasschrome.KeyFileParser.ECB_BLOCK_SIZE);
+      });
 };
 
 
 /**
  * Decrypts the keyfile.
  * @param {!keepasschrome.KeyFileHeader.Flags} headerFlags The header flags.
- * @param {!CryptoJS.lib.WordArray} encryptedData The encrypted part of the
+ * @param {!Uint8Array} encryptedData The encrypted key file.
+ * @param {!Uint8Array} encryptionInitialValue The initial value for
+ *     encryption.
+ * @param {!Uint8Array} contentsHash The correct hash of the contents.
+ * @param {!ArrayBuffer} key The key to decrypt the key file.
+ * @return {!Promise.<!ArrayBuffer>} A promise that resolves to the decrypted
  *     keyfile.
- * @param {!CryptoJS.lib.WordArray} key The key to decrypt the keyfile.
- * @param {!CryptoJS.lib.WordArray} encryptionInitialValue The IV key from the
- *     header.
- * @param {!CryptoJS.lib.WordArray} contentsHash The hash of the contents to
- *     check that the decryption succeeds.
- * @return {!CryptoJS.lib.WordArray} The decrypted keyfile.
  * @private
  */
 keepasschrome.KeyFileParser.prototype.decryptFile_ = function(headerFlags,
-      encryptedData, key, encryptionInitialValue, contentsHash) {
-  var cipherParams = CryptoJS.lib.CipherParams.create({
-      ciphertext: encryptedData
-  });
-  var cfg = {
-    'mode': CryptoJS.mode.CBC,
-    'iv': encryptionInitialValue,
-    'padding': CryptoJS.pad.Pkcs7
-  };
-  var decryptedData;
-  if (headerFlags.rijndael) {
-    decryptedData = this.decryptAes_(cipherParams, key, cfg);
-  } else if (headerFlags.twofish) {
-    decryptedData = this.decryptTwoFish_(cipherParams, key, cfg);
+    encryptedData, encryptionInitialValue, contentsHash, key) {
+  var decryptParams = new keepasschrome.DecryptParams(headerFlags,
+      encryptedData, encryptionInitialValue, contentsHash, key);
+  if (decryptParams.headerFlags.rijndael) {
+    return this.generateDecryptCryptoKey_(decryptParams)
+        .then(this.decryptAes_.bind(this))
+        .then(this.verifyDecryptedData_.bind(this));
   } else {
     throw new Error('Invalid encryption type');
   }
-  var hash = CryptoJS.SHA256(decryptedData);
-  if (hash.toString() !== contentsHash.toString()) {
-    throw new Error('Invalid password');
-  }
-  return decryptedData;
+};
+
+
+/**
+ * Generates the crypto key to decrypt the file.
+ * @param {!keepasschrome.DecryptParams} decryptParams The decrypt params.
+ * @return {!Promise.<!keepasschrome.DecryptParams>} The decrypt params with the
+ *     crypto key.
+ * @private
+ */
+keepasschrome.KeyFileParser.prototype.generateDecryptCryptoKey_ = function(
+    decryptParams) {
+  var algoParams = {
+    'name': 'AES-CBC',
+    'iv': decryptParams.encryptionInitialValue
+  };
+  return crypto.subtle.importKey(
+      'raw', decryptParams.key, algoParams, false, ['decrypt'])
+          .then(function(cryptoKey) {
+              decryptParams.cryptoKey = cryptoKey;
+              return decryptParams;
+          });
 };
 
 
 /**
  * Decrypts the keyfile with AES.
- * @param {!CryptoJS.lib.CipherParams} cipherParams The cipher params containing
- *     the bytes to decrypt.
- * @param {!CryptoJS.lib.WordArray} key The decryption key.
- * @param {!Object} cfg The decryption parameters.
- * @return {!CryptoJS.lib.WordArray} The decrypted bytes.
+ * @param {!keepasschrome.DecryptParams} decryptParams The decrypt params.
+ * @return {!Promise.<!keepasschrome.DecryptParams>} A promise that resolves to
+ *     the decrypt params with the decrypted key file.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.decryptAes_ = function(cipherParams, key,
-      cfg) {
-  var decryptedData = CryptoJS.AES.decrypt(cipherParams, key, cfg);
-  decryptedData.clamp();
-  return decryptedData;
+keepasschrome.KeyFileParser.prototype.decryptAes_ = function(decryptParams) {
+  var algoParams = {
+    'name': 'AES-CBC',
+    'iv': decryptParams.encryptionInitialValue
+  };
+  return crypto.subtle.decrypt(algoParams, decryptParams.cryptoKey,
+      decryptParams.encryptedData)
+      .then(function(decryptedData) {
+          decryptParams.decryptedData = decryptedData;
+          return decryptParams;
+      });
 };
 
 
 /**
- * Decrypts the keyfile with Two Fish.
- * @param {!CryptoJS.lib.CipherParams} cipherParams The cipher params containing
- *     the bytes to decrypt.
- * @param {!CryptoJS.lib.WordArray} key The decryption key.
- * @param {!Object} cfg The decryption parameters.
- * @return {!CryptoJS.lib.WordArray} The decrypted bytes.
+ * Verifies that the data was correctly decrypted, mainly to determine if the
+ * password was correct.
+ * @param {!keepasschrome.DecryptParams} decryptParams The decrypt params.
+ * @return {!Promise.<ArrayBuffer>} A promise that resolves to the decrpyted
+ *     data.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.decryptTwoFish_ = function(cipherParams,
-    key, cfg) {
-  var decryptedData = CryptoJS.TwoFish.decrypt(cipherParams, key, cfg);
-  decryptedData.clamp();
-  return decryptedData;
+keepasschrome.KeyFileParser.prototype.verifyDecryptedData_ = function(
+    decryptParams) {
+  return this.hash_(decryptParams.decryptedData)
+      .then(function(decryptedDataHash) {
+          if (this.arrayBuffersEqual_(decryptParams.contentsHash,
+              decryptedDataHash)) {
+            return decryptParams.decryptedData;
+          } else {
+            throw new Error('Invalid password');
+          }
+      }.bind(this));
+};
+
+
+/**
+ * Determines if the two ArrayBuffers are equal.
+ * @param {ArrayBuffer} buffer1 The first ArrayBuffer to compare.
+ * @param {ArrayBuffer} buffer2 The second ArrayBuffer to compare.
+ * @return {boolean} true if the two ArrayBuffers have the same content, false
+ *     otherwise.
+ * @private
+ */
+keepasschrome.KeyFileParser.prototype.arrayBuffersEqual_ = function(buffer1,
+    buffer2) {
+  if (buffer1 === buffer2) {
+    return true;
+  } else if (buffer1 === null || buffer2 === null) {
+    return false;
+  } else if (buffer1.byteLength !== buffer2.byteLength) {
+    return false;
+  } else {
+    var array1 = new Uint8Array(buffer1);
+    var array2 = new Uint8Array(buffer2);
+    for (var i = 0; i < array1.length; i++) {
+      if (array1[i] !== array2[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
 };
 
 
 /**
  * Parses the decryped key file.
- * @param {!keepasschrome.BinaryReader} contents The decrypted key file.
  * @param {number} numGroups The number of groups in the key file.
  * @param {number} numEntries The number of entries in the key file.
+ * @param {!ArrayBuffer} decryptedData The decrypted key file data.
  * @return {!keepasschrome.Group} The top group of the key file.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.parseContents_ = function(contents,
-    numGroups, numEntries) {
+keepasschrome.KeyFileParser.prototype.parseContents_ = function(numGroups,
+    numEntries, decryptedData) {
+  var contents = new keepasschrome.BinaryReader(decryptedData);
   var groups = [];
   var levels = [];
   for (var curGroup = 0; curGroup < numGroups; curGroup++) {

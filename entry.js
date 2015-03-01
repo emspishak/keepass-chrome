@@ -8,7 +8,7 @@
  */
 keepasschrome.Entry = function() {
 
-  /** @type {Array.<number>} */
+  /** @type {Uint8Array} */
   this.uuid;
 
   /** @type {number} */
@@ -47,7 +47,7 @@ keepasschrome.Entry = function() {
   /** @type {string} */
   this.binaryDesc;
 
-  /** @type {Array.<number>} */
+  /** @type {Uint8Array} */
   this.binary;
 
   /** @type {keepasschrome.Group} */

@@ -4,11 +4,9 @@
 
 /**
  * @param {!ArrayBuffer} arraybuffer The binary data to read.
- * @param {number=} opt_length The length of the data, uses the ArrayBuffers
- *     byte length if this isn't specified.
  * @constructor
  */
-keepasschrome.BinaryReader = function(arraybuffer, opt_length) {
+keepasschrome.BinaryReader = function(arraybuffer) {
 
   /**
    * @type {!Uint8Array}
@@ -20,35 +18,7 @@ keepasschrome.BinaryReader = function(arraybuffer, opt_length) {
    * @type {number}
    * @private
    */
-  this.length_ = opt_length || arraybuffer.byteLength;
-
-  /**
-   * @type {number}
-   * @private
-   */
   this.pos_ = 0;
-};
-
-
-/**
- * Creates a BinaryReader from a WordArray.
- * @param {!CryptoJS.lib.WordArray} wordArray The WordArray.
- * @return {!keepasschrome.BinaryReader} A new BinaryReader.
- */
-keepasschrome.BinaryReader.fromWordArray = function(wordArray) {
-  var length = Math.ceil(wordArray.sigBytes / Uint32Array.BYTES_PER_ELEMENT) *
-                   Uint32Array.BYTES_PER_ELEMENT;
-  var buf = new ArrayBuffer(length);
-  var words = new Uint32Array(buf);
-  // swap endianness, from
-  // http://stackoverflow.com/questions/5320439/#answer-5320624
-  words.set(wordArray.words.map(function(val) {
-    return ((val & 0xFF) << 24) |
-        ((val & 0xFF00) << 8) |
-        ((val >> 8) & 0xFF00) |
-        ((val >> 24) & 0xFF);
-  }));
-  return new keepasschrome.BinaryReader(buf, wordArray.sigBytes);
 };
 
 
@@ -56,7 +26,7 @@ keepasschrome.BinaryReader.fromWordArray = function(wordArray) {
  * @return {boolean} True if there's at least one more byte.
  */
 keepasschrome.BinaryReader.prototype.hasNextByte = function() {
-  return this.pos_ < this.length_;
+  return this.pos_ < this.data_.length;
 };
 
 
@@ -64,7 +34,7 @@ keepasschrome.BinaryReader.prototype.hasNextByte = function() {
  * @return {boolean} True if there's at least one more int.
  */
 keepasschrome.BinaryReader.prototype.hasNextInt = function() {
-  return this.pos_ < this.length_ - 3;
+  return this.pos_ < this.data_.length - 3;
 };
 
 
@@ -82,13 +52,11 @@ keepasschrome.BinaryReader.prototype.readByte_ = function() {
 
 /**
  * @param {number} num The number of bytes to read.
- * @return {!Array.<number>} The bytes.
+ * @return {!Uint8Array} The bytes.
  */
 keepasschrome.BinaryReader.prototype.readBytes = function(num) {
-  var bytes = [];
-  for (var i = 0; i < num; i++) {
-    bytes.push(this.readByte_());
-  }
+  var bytes = this.data_.subarray(this.pos_, this.pos_ + num);
+  this.pos_ += num;
   return bytes;
 };
 
@@ -125,44 +93,12 @@ keepasschrome.BinaryReader.prototype.readInt = function() {
 
 
 /**
- * @return {number} The word.
- * @private
+ * @return {!Uint8Array} The bytes.
  */
-keepasschrome.BinaryReader.prototype.readWord_ = function() {
-  var bytes = this.readBytes(4);
-  var result = 0;
-  for (var i = 0; i < bytes.length; i++) {
-    result = (result * 256) + bytes[i];
-  }
-  return result;
-};
-
-
-/**
- * @param {number} num The number of bytes to read.
- * @return {!CryptoJS.lib.WordArray} The bytes.
- */
-keepasschrome.BinaryReader.prototype.readWordArray = function(num) {
-  var words = [];
-  while (num > 0) {
-    words.push(this.readWord_());
-    num -= 4;
-  }
-  return CryptoJS.lib.WordArray.create(words);
-};
-
-
-/**
- * @return {!CryptoJS.lib.WordArray} The bytes.
- */
-keepasschrome.BinaryReader.prototype.readRestToWordArray = function() {
-  var restOfFile = [];
-  var numBytes = 0;
-  while (this.hasNextInt()) {
-    restOfFile.push(this.readWord_());
-    numBytes += 4;
-  }
-  return CryptoJS.lib.WordArray.create(restOfFile, numBytes);
+keepasschrome.BinaryReader.prototype.readRest = function() {
+  var bytes = this.data_.subarray(this.pos_);
+  this.pos_ = this.data_.length;
+  return bytes;
 };
 
 
