@@ -6,7 +6,7 @@
 
   "name": "KeePass Chrome",
   "description": "A Chrome extension for KeePass",
-  "version": "0.12",
+  "version": "0.13",
 
   "permissions": [
     "identity",
