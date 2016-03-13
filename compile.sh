@@ -13,5 +13,6 @@ closure-compiler \
   --compilation_level ADVANCED_OPTIMIZATIONS \
   --warning_level=VERBOSE \
   --externs externs.js <(curl -s $CHROME_EXTERNS) \
-  --language_in ECMASCRIPT5_STRICT \
+  --language_in ECMASCRIPT6_STRICT \
+  --summary_detail_level=3 \
   --js $FILES
