@@ -36,7 +36,7 @@ keepasschrome.DecryptProgressBar = function() {
 
 /**
  * Renders itself at the end of the parent element.
- * @param {!HTMLElement} parentElement The parent of this progress bar.
+ * @param {!Element} parentElement The parent of this progress bar.
  */
 keepasschrome.DecryptProgressBar.prototype.render = function(parentElement) {
   var progressBarElement = document.createElement('span');

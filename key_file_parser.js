@@ -325,7 +325,7 @@ keepasschrome.KeyFileParser.prototype.decryptAes_ = function(decryptParams) {
  * Verifies that the data was correctly decrypted, mainly to determine if the
  * password was correct.
  * @param {!keepasschrome.DecryptParams} decryptParams The decrypt params.
- * @return {!Promise.<ArrayBuffer>} A promise that resolves to the decrpyted
+ * @return {!Promise.<!ArrayBuffer>} A promise that resolves to the decrpyted
  *     data.
  * @private
  */
@@ -345,8 +345,10 @@ keepasschrome.KeyFileParser.prototype.verifyDecryptedData_ = function(
 
 /**
  * Determines if the two ArrayBuffers are equal.
- * @param {ArrayBuffer} buffer1 The first ArrayBuffer to compare.
- * @param {ArrayBuffer} buffer2 The second ArrayBuffer to compare.
+ * @param {ArrayBuffer|ArrayBufferView} buffer1 The first ArrayBuffer to
+ *     compare.
+ * @param {ArrayBuffer|ArrayBufferView} buffer2 The second ArrayBuffer to
+ *     compare.
  * @return {boolean} true if the two ArrayBuffers have the same content, false
  *     otherwise.
  * @private
