@@ -16,4 +16,4 @@ closure-compiler \
   --warning_level=VERBOSE \
   --externs externs.js <(curl -s $CHROME_EXTERNS) <(curl -s $ENCODING_EXTERNS) \
   --language_in ECMASCRIPT5_STRICT \
-  $FILES
+  --js $FILES
