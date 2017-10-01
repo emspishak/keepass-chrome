@@ -29,7 +29,7 @@ keepasschrome.DecryptParams = function(headerFlags, encryptedData,
   /** @type {!ArrayBuffer} */
   this.key = key;
 
-  /** @type {!CryptoKey} */
+  /** @type {!webCrypto.CryptoKey} */
   this.cryptoKey;
 
   /** @type {!ArrayBuffer} */

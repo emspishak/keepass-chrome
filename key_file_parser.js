@@ -175,7 +175,8 @@ keepasschrome.KeyFileParser.prototype.hashKey_ = function(params) {
  * @private
  */
 keepasschrome.KeyFileParser.prototype.hash_ = function(arrayBuffer) {
-  return crypto.subtle.digest({'name': 'SHA-256'}, arrayBuffer);
+  return /** @type {!Promise.<!ArrayBuffer>} */ (
+      crypto.subtle.digest({'name': 'SHA-256'}, arrayBuffer));
 };
 
 
@@ -194,6 +195,7 @@ keepasschrome.KeyFileParser.prototype.generateCryptoKey_ = function(params) {
   return crypto.subtle.importKey(
       'raw', params.masterSeed2, algoParams, false, ['encrypt'])
           .then(function(cryptoKey) {
+              cryptoKey = /** @type {!webCrypto.CryptoKey} */ (cryptoKey);
               params.cryptoKey = cryptoKey;
               return params;
           });
@@ -246,6 +248,7 @@ keepasschrome.KeyFileParser.prototype.encryptPartialKey_ = function(params,
           startIndex + keepasschrome.KeyFileParser.ECB_BLOCK_SIZE);
   return crypto.subtle.encrypt(algoParams, params.cryptoKey, blockToEncrypt)
       .then(function(encryptedBlock) {
+          encryptedBlock = /** @type {!ArrayBuffer} */ (encryptedBlock);
           return new Uint8Array(encryptedBlock)
               .subarray(0, keepasschrome.KeyFileParser.ECB_BLOCK_SIZE);
       });
@@ -294,6 +297,7 @@ keepasschrome.KeyFileParser.prototype.generateDecryptCryptoKey_ = function(
   return crypto.subtle.importKey(
       'raw', decryptParams.key, algoParams, false, ['decrypt'])
           .then(function(cryptoKey) {
+              cryptoKey = /** @type {!webCrypto.CryptoKey} */ (cryptoKey);
               decryptParams.cryptoKey = cryptoKey;
               return decryptParams;
           });
@@ -315,6 +319,7 @@ keepasschrome.KeyFileParser.prototype.decryptAes_ = function(decryptParams) {
   return crypto.subtle.decrypt(algoParams, decryptParams.cryptoKey,
       decryptParams.encryptedData)
       .then(function(decryptedData) {
+          decryptedData = /** @type {!ArrayBuffer} */ (decryptedData);
           decryptParams.decryptedData = decryptedData;
           return decryptParams;
       });

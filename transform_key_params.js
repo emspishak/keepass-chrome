@@ -28,6 +28,6 @@ keepasschrome.TransformKeyParams = function(
   /** @type {!ArrayBuffer} */
   this.encryptedKey;
 
-  /** @type {!CryptoKey} */
+  /** @type {!webCrypto.CryptoKey} */
   this.cryptoKey;
 };
