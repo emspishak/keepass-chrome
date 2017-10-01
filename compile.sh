@@ -16,4 +16,5 @@ closure-compiler \
   --externs externs.js <(curl -s $CHROME_EXTERNS) <(curl -s $CHROME_EXTENSIONS_EXTERNS) \
   --language_in ECMASCRIPT6_STRICT \
   --summary_detail_level=3 \
+  --jscomp_error=lintChecks \
   --js $FILES
