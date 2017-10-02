@@ -130,13 +130,18 @@ keepasschrome.Popup.prototype.displayFiles_ = function(request) {
   var files = JSON.parse(request.responseText);
   var ul = document.getElementById('files');
   ul.innerHTML = '';
-  if (files.items.length) {
-    for (var i = 0; i < files.items.length; i++) {
-      var file = files.items[i];
+  if (files['items']['length']) {
+    for (var i = 0; i < files['items']['length']; i++) {
+      var file = files['items'][i];
+      var filename = document.createElement('div');
+      filename.textContent = file['title'];
+      var modified = document.createElement('div');
+      modified.textContent = 'Last modified: ' + new Date(file['modifiedDate']);
       var li = document.createElement('li');
-      li.textContent = file.title;
+      li.appendChild(filename);
+      li.appendChild(modified);
       li.addEventListener('click',
-          this.handleKeyFileClick_.bind(this, file.id));
+          this.handleKeyFileClick_.bind(this, file['id']));
       ul.appendChild(li);
     }
   } else {
