@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
   new keepasschrome.Popup().start();
 });
 
+
+
 /**
  * @constructor
  */
@@ -15,13 +17,14 @@ keepasschrome.Popup = function() {};
 /** @const */ keepasschrome.Popup.API_BASE =
     'https://www.googleapis.com/drive/v2';
 
+
 /**
  * Starts the KeyPass Chrome extension.
  */
 keepasschrome.Popup.prototype.start = function() {
   this.onEnter_('key-file-name', this.searchForKeyFile_.bind(this));
-  document.getElementById('key-file-search').addEventListener('click',
-      this.searchForKeyFile_.bind(this));
+  document.getElementById('key-file-search')
+      .addEventListener('click', this.searchForKeyFile_.bind(this));
 };
 
 
@@ -61,13 +64,16 @@ keepasschrome.Popup.prototype.checkError_ = function() {
  * @private
  */
 keepasschrome.Popup.prototype.searchForKeyFile_ = function() {
-  var query = ( /** @type {!HTMLInputElement} */ (
+  var query = (/** @type {!HTMLInputElement} */ (
       document.getElementById('key-file-name'))).value;
-  var encodedQuery = encodeURIComponent(query).replace("'", "\\'");
+  var encodedQuery = encodeURIComponent(query).replace('\'', '\\\'');
   document.getElementById('files').innerHTML = '';
   this.showLoading_('Searching Drive...');
-  this.sendXhr_('GET', keepasschrome.Popup.API_BASE + '/files?q=title+=+\'' +
-      encodedQuery + '\'', this.displayFiles_.bind(this));
+  this.sendXhr_(
+      'GET',
+      keepasschrome.Popup.API_BASE + '/files?q=title+=+\'' + encodedQuery +
+          '\'',
+      this.displayFiles_.bind(this));
 };
 
 
@@ -81,11 +87,12 @@ keepasschrome.Popup.prototype.searchForKeyFile_ = function() {
  *     to string.
  * @private
  */
-keepasschrome.Popup.prototype.sendXhr_ = function(method, url, callback,
-    opt_responseType) {
-  chrome.identity.getAuthToken({ 'interactive': true },
-      this.getAuthTokenCallback_.bind(this, method, url, callback,
-          opt_responseType));
+keepasschrome.Popup.prototype.sendXhr_ = function(
+    method, url, callback, opt_responseType) {
+  chrome.identity.getAuthToken(
+      {'interactive': true},
+      this.getAuthTokenCallback_.bind(
+          this, method, url, callback, opt_responseType));
 };
 
 
@@ -100,8 +107,8 @@ keepasschrome.Popup.prototype.sendXhr_ = function(method, url, callback,
  * @param {string=} opt_token The authentication token.
  * @private
  */
-keepasschrome.Popup.prototype.getAuthTokenCallback_ = function(method, url,
-    callback, responseType, opt_token) {
+keepasschrome.Popup.prototype.getAuthTokenCallback_ = function(
+    method, url, callback, responseType, opt_token) {
   if (this.checkError_()) {
     return;
   } else if (!opt_token) {
@@ -128,8 +135,8 @@ keepasschrome.Popup.prototype.getAuthTokenCallback_ = function(method, url,
  * @private
  */
 keepasschrome.Popup.prototype.displayFiles_ = function(request) {
-  var files = /** @type {drive.FilesListResponse} */ (
-      JSON.parse(request.responseText));
+  var files =
+      /** @type {drive.FilesListResponse} */ (JSON.parse(request.responseText));
   var ul = document.getElementById('files');
   ul.innerHTML = '';
   if (files.items.length) {
@@ -142,8 +149,8 @@ keepasschrome.Popup.prototype.displayFiles_ = function(request) {
       var li = document.createElement('li');
       li.appendChild(filename);
       li.appendChild(modified);
-      li.addEventListener('click',
-          this.handleKeyFileClick_.bind(this, file.id));
+      li.addEventListener(
+          'click', this.handleKeyFileClick_.bind(this, file.id));
       ul.appendChild(li);
     }
   } else {
@@ -181,13 +188,14 @@ keepasschrome.Popup.prototype.handleKeyFileClick_ = function(opt_keyFileId) {
  * @param {string} keyFileId The ID of the keyfile.
  * @private
  */
-keepasschrome.Popup.prototype.handleMasterPasswordOkClick_ =
-    function(keyFileId) {
+keepasschrome.Popup.prototype.handleMasterPasswordOkClick_ = function(
+    keyFileId) {
   // If the 'invalid password' error is shown.
   this.hideError_();
   document.getElementById('master-password-enter').style.display = 'none';
   this.showLoading_('Getting key file...');
-  this.sendXhr_('GET', keepasschrome.Popup.API_BASE + '/files/' + keyFileId,
+  this.sendXhr_(
+      'GET', keepasschrome.Popup.API_BASE + '/files/' + keyFileId,
       this.fetchKeyFile_.bind(this));
 };
 
@@ -200,8 +208,8 @@ keepasschrome.Popup.prototype.handleMasterPasswordOkClick_ =
  */
 keepasschrome.Popup.prototype.fetchKeyFile_ = function(request) {
   var file = /** @type {!drive.File} */ (JSON.parse(request.responseText));
-  this.sendXhr_('GET', file.downloadUrl, this.processKeyFile_.bind(this),
-      'arraybuffer');
+  this.sendXhr_(
+      'GET', file.downloadUrl, this.processKeyFile_.bind(this), 'arraybuffer');
 };
 
 
@@ -213,11 +221,12 @@ keepasschrome.Popup.prototype.fetchKeyFile_ = function(request) {
  */
 keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
   this.showLoading_('Processing key file...');
-  var password = ( /** @type {HTMLInputElement} */ (
+  var password = (/** @type {HTMLInputElement} */ (
       document.getElementById('master-password'))).value;
   var response = request.response;
   if (!(response instanceof ArrayBuffer)) {
-    this.showError_('XHR response expected to be ArrayBuffer but got ' +
+    this.showError_(
+        'XHR response expected to be ArrayBuffer but got ' +
         response.toString());
     this.showMasterPassword_();
     return;
@@ -227,9 +236,11 @@ keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
   if (loadingElement) {
     progressBar.render(loadingElement);
   }
-  new keepasschrome.KeyFileParser(response).parse(password, progressBar).then(
-    this.displayKeyFile_.bind(this),
-    this.displayDecryptionError_.bind(this));
+  new keepasschrome.KeyFileParser(response)
+      .parse(password, progressBar)
+      .then(
+          this.displayKeyFile_.bind(this),
+          this.displayDecryptionError_.bind(this));
 };
 
 
@@ -341,12 +352,12 @@ keepasschrome.Popup.prototype.createEntryElement_ = function(entry) {
  */
 keepasschrome.Popup.prototype.shouldDisplayEntry_ = function(entry) {
   return typeof entry.binary === 'undefined' ||
-    typeof entry.comment === 'undefined' || entry.comment === '' ||
-    entry.binaryDesc != 'bin-stream' ||
-    entry.title != 'Meta-Info' ||
-    entry.username != 'SYSTEM' ||
-    entry.url != '$' ||
-    entry.image != 0;
+      typeof entry.comment === 'undefined' || entry.comment === '' ||
+      entry.binaryDesc != 'bin-stream' ||
+      entry.title != 'Meta-Info' ||
+      entry.username != 'SYSTEM' ||
+      entry.url != '$' ||
+      entry.image != 0;
 };
 
 

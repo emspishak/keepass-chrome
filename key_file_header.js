@@ -2,6 +2,8 @@
  * @fileoverview A keyfile header.
  */
 
+
+
 /**
  * @param {number} signature1
  * @param {number} signature2
@@ -54,6 +56,7 @@ keepasschrome.KeyFileHeader = function(
   /** @type {number} */
   this.keyEncryptionRounds = keyEncryptionRounds;
 };
+
 
 
 /**

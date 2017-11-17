@@ -2,6 +2,8 @@
  * @fileoverview Reads binary data.
  */
 
+
+
 /**
  * @param {!ArrayBuffer} arraybuffer The binary data to read.
  * @constructor

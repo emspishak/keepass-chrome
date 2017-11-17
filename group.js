@@ -2,6 +2,8 @@
  * @fileoverview A group in a keyfile.
  */
 
+
+
 /**
  * @param {number} id The group's ID.
  * @param {string} title The title of the group.

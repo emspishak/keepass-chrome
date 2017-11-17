@@ -2,6 +2,8 @@
  * @fileoverview A struct that stores the data needed to transform a key.
  */
 
+
+
 /**
  * @param {string} plainTextKey
  * @param {!Uint8Array} masterSeed

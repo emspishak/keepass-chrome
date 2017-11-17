@@ -2,6 +2,8 @@
  * @fileoverview A progress bar for the decryption process.
  */
 
+
+
 /**
  * @constructor
  */
@@ -23,14 +25,14 @@ keepasschrome.DecryptProgressBar = function() {
    * @type {!Element}
    * @private
    */
-   this.progressBarInnerElement_;
+  this.progressBarInnerElement_;
 
 
-   /**
-    * @type {number}
-    * @private
-    */
-   this.progressBarWidth_;
+  /**
+   * @type {number}
+   * @private
+   */
+  this.progressBarWidth_;
 };
 
 

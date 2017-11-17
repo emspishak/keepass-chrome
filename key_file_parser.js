@@ -2,6 +2,8 @@
  * @fileoverview Decrypts and parses a keyfile.
  */
 
+
+
 /**
  * @param {!ArrayBuffer} arraybuffer The keyfile bytes.
  * @constructor
@@ -44,10 +46,13 @@ keepasschrome.KeyFileParser.prototype.parse = function(password, progressBar) {
   }
   this.progressBar_.setTotalEncryptionRounds(header.keyEncryptionRounds);
   var encryptedData = this.bytes_.readRest();
-  return this.transformKey_(password, header.masterSeed,
-          header.masterSeed2, header.keyEncryptionRounds)
-      .then(this.decryptFile_.bind(this, header.flags, encryptedData,
-          header.encryptionInitialValue, header.contentsHash))
+  return this
+      .transformKey_(
+          password, header.masterSeed, header.masterSeed2,
+          header.keyEncryptionRounds)
+      .then(this.decryptFile_.bind(
+          this, header.flags, encryptedData, header.encryptionInitialValue,
+          header.contentsHash))
       .then(this.parseContents_.bind(this, header.groups, header.entries));
 };
 
@@ -118,8 +123,8 @@ keepasschrome.KeyFileParser.prototype.verifyVersion_ = function(header) {
  *     decrypt the keyfile.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.transformKey_ = function(plainTextKey,
-    masterSeed, masterSeed2, keyEncryptionRounds) {
+keepasschrome.KeyFileParser.prototype.transformKey_ = function(
+    plainTextKey, masterSeed, masterSeed2, keyEncryptionRounds) {
   var zeroIv = new Uint8Array(
       new ArrayBuffer(keepasschrome.KeyFileParser.ECB_BLOCK_SIZE));
   for (var i = 0; i < keepasschrome.KeyFileParser.ECB_BLOCK_SIZE; i++) {
@@ -135,16 +140,15 @@ keepasschrome.KeyFileParser.prototype.transformKey_ = function(plainTextKey,
   }
   return transformKey
       .then(function(params) {
-          return params.encryptedKey;
+        return params.encryptedKey;
       })
       .then(this.hash_.bind(this))
       .then(function(hashedKey) {
-          var masterSeedAndKey = new Uint8Array(masterSeed.byteLength +
-              hashedKey.byteLength);
-          masterSeedAndKey.set(masterSeed);
-          masterSeedAndKey.set(new Uint8Array(hashedKey),
-              masterSeed.byteLength);
-          return masterSeedAndKey.buffer;
+        var masterSeedAndKey =
+            new Uint8Array(masterSeed.byteLength + hashedKey.byteLength);
+        masterSeedAndKey.set(masterSeed);
+        masterSeedAndKey.set(new Uint8Array(hashedKey), masterSeed.byteLength);
+        return masterSeedAndKey.buffer;
       })
       .then(this.hash_.bind(this));
 };
@@ -159,11 +163,10 @@ keepasschrome.KeyFileParser.prototype.transformKey_ = function(plainTextKey,
  */
 keepasschrome.KeyFileParser.prototype.hashKey_ = function(params) {
   var encodedKey = new TextEncoder().encode(params.plainTextKey);
-  return this.hash_(encodedKey).then(
-      function(hashedKey) {
-          params.encryptedKey = hashedKey;
-          return params;
-      });
+  return this.hash_(encodedKey).then(function(hashedKey) {
+    params.encryptedKey = hashedKey;
+    return params;
+  });
 };
 
 
@@ -187,16 +190,13 @@ keepasschrome.KeyFileParser.prototype.hash_ = function(arrayBuffer) {
  * @private
  */
 keepasschrome.KeyFileParser.prototype.generateCryptoKey_ = function(params) {
-  var algoParams = {
-    'name': 'AES-CBC',
-    'iv': params.initialValue
-  };
-  return crypto.subtle.importKey(
-      'raw', params.masterSeed2, algoParams, false, ['encrypt'])
-          .then(function(cryptoKey) {
-              params.cryptoKey = cryptoKey;
-              return params;
-          });
+  var algoParams = {'name': 'AES-CBC', 'iv': params.initialValue};
+  return crypto.subtle
+      .importKey('raw', params.masterSeed2, algoParams, false, ['encrypt'])
+      .then(function(cryptoKey) {
+        params.cryptoKey = cryptoKey;
+        return params;
+      });
 };
 
 
@@ -211,9 +211,11 @@ keepasschrome.KeyFileParser.prototype.generateCryptoKey_ = function(params) {
  */
 keepasschrome.KeyFileParser.prototype.encryptKey_ = function(params) {
   var Constants = keepasschrome.KeyFileParser;
-  return Promise.all([
-          this.encryptPartialKey_(params, 0),
-          this.encryptPartialKey_(params, Constants.ECB_BLOCK_SIZE)])
+  return Promise
+      .all([
+        this.encryptPartialKey_(params, 0),
+        this.encryptPartialKey_(params, Constants.ECB_BLOCK_SIZE)
+      ])
       .then(this.finishEncryptKey_.bind(this, params));
 };
 
@@ -227,8 +229,8 @@ keepasschrome.KeyFileParser.prototype.encryptKey_ = function(params) {
  *     encrypted key.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.finishEncryptKey_ = function(params,
-    partialKeys) {
+keepasschrome.KeyFileParser.prototype.finishEncryptKey_ = function(
+    params, partialKeys) {
   var firstHalf = partialKeys[0];
   var secondHalf = partialKeys[1];
 
@@ -250,19 +252,18 @@ keepasschrome.KeyFileParser.prototype.finishEncryptKey_ = function(params,
  * @return {!Promise<!Uint8Array>} The encrypted block.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.encryptPartialKey_ = function(params,
-    startIndex) {
-  var algoParams = {
-    'name': 'AES-CBC',
-    'iv': params.initialValue
-  };
-  var blockToEncrypt = new Uint8Array(params.encryptedKey)
-      .subarray(startIndex,
-          startIndex + keepasschrome.KeyFileParser.ECB_BLOCK_SIZE);
+keepasschrome.KeyFileParser.prototype.encryptPartialKey_ = function(
+    params, startIndex) {
+  var algoParams = {'name': 'AES-CBC', 'iv': params.initialValue};
+  var blockToEncrypt =
+      new Uint8Array(params.encryptedKey)
+          .subarray(
+              startIndex,
+              startIndex + keepasschrome.KeyFileParser.ECB_BLOCK_SIZE);
   return crypto.subtle.encrypt(algoParams, params.cryptoKey, blockToEncrypt)
       .then(function(encryptedBlock) {
-          return new Uint8Array(encryptedBlock)
-              .subarray(0, keepasschrome.KeyFileParser.ECB_BLOCK_SIZE);
+        return new Uint8Array(encryptedBlock)
+            .subarray(0, keepasschrome.KeyFileParser.ECB_BLOCK_SIZE);
       });
 };
 
@@ -279,10 +280,10 @@ keepasschrome.KeyFileParser.prototype.encryptPartialKey_ = function(params,
  *     keyfile.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.decryptFile_ = function(headerFlags,
-    encryptedData, encryptionInitialValue, contentsHash, key) {
-  var decryptParams = new keepasschrome.DecryptParams(headerFlags,
-      encryptedData, encryptionInitialValue, contentsHash, key);
+keepasschrome.KeyFileParser.prototype.decryptFile_ = function(
+    headerFlags, encryptedData, encryptionInitialValue, contentsHash, key) {
+  var decryptParams = new keepasschrome.DecryptParams(
+      headerFlags, encryptedData, encryptionInitialValue, contentsHash, key);
   if (decryptParams.headerFlags.rijndael) {
     return this.generateDecryptCryptoKey_(decryptParams)
         .then(this.decryptAes_.bind(this))
@@ -306,12 +307,12 @@ keepasschrome.KeyFileParser.prototype.generateDecryptCryptoKey_ = function(
     'name': 'AES-CBC',
     'iv': decryptParams.encryptionInitialValue
   };
-  return crypto.subtle.importKey(
-      'raw', decryptParams.key, algoParams, false, ['decrypt'])
-          .then(function(cryptoKey) {
-              decryptParams.cryptoKey = cryptoKey;
-              return decryptParams;
-          });
+  return crypto.subtle
+      .importKey('raw', decryptParams.key, algoParams, false, ['decrypt'])
+      .then(function(cryptoKey) {
+        decryptParams.cryptoKey = cryptoKey;
+        return decryptParams;
+      });
 };
 
 
@@ -327,11 +328,11 @@ keepasschrome.KeyFileParser.prototype.decryptAes_ = function(decryptParams) {
     'name': 'AES-CBC',
     'iv': decryptParams.encryptionInitialValue
   };
-  return crypto.subtle.decrypt(algoParams, decryptParams.cryptoKey,
-      decryptParams.encryptedData)
+  return crypto.subtle
+      .decrypt(algoParams, decryptParams.cryptoKey, decryptParams.encryptedData)
       .then(function(decryptedData) {
-          decryptParams.decryptedData = decryptedData;
-          return decryptParams;
+        decryptParams.decryptedData = decryptedData;
+        return decryptParams;
       });
 };
 
@@ -358,8 +359,8 @@ keepasschrome.KeyFileParser.prototype.verifyDecryptedData_ = function(
  * @return {!ArrayBuffer} The decrypted data.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.finishVerifyDecryptedData_ =
-    function(decryptParams, decryptedDataHash) {
+keepasschrome.KeyFileParser.prototype.finishVerifyDecryptedData_ = function(
+    decryptParams, decryptedDataHash) {
   if (this.arrayBuffersEqual_(decryptParams.contentsHash, decryptedDataHash)) {
     return decryptParams.decryptedData;
   } else {
@@ -378,8 +379,8 @@ keepasschrome.KeyFileParser.prototype.finishVerifyDecryptedData_ =
  *     otherwise.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.arrayBuffersEqual_ = function(buffer1,
-    buffer2) {
+keepasschrome.KeyFileParser.prototype.arrayBuffersEqual_ = function(
+    buffer1, buffer2) {
   if (buffer1 === buffer2) {
     return true;
   } else if (buffer1 === null || buffer2 === null) {
@@ -407,8 +408,8 @@ keepasschrome.KeyFileParser.prototype.arrayBuffersEqual_ = function(buffer1,
  * @return {!keepasschrome.Group} The top group of the key file.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.parseContents_ = function(numGroups,
-    numEntries, decryptedData) {
+keepasschrome.KeyFileParser.prototype.parseContents_ = function(
+    numGroups, numEntries, decryptedData) {
   var contents = new keepasschrome.BinaryReader(decryptedData);
   var groups = [];
   var levels = [];
@@ -550,20 +551,20 @@ keepasschrome.KeyFileParser.prototype.readEntry_ = function(contents) {
  * @param {!keepasschrome.Group} rootGroup The top group.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.createGroupTree_ = function(levels,
-    groups, rootGroup) {
+keepasschrome.KeyFileParser.prototype.createGroupTree_ = function(
+    levels, groups, rootGroup) {
   for (var i = 0; i < groups.length; i++) {
     if (levels[i] == 0) {
       rootGroup.addChild(groups[i]);
     } else {
       var parentGroupIndex = this.findParentGroupIndex_(i, levels);
-      var parentGroup = (parentGroupIndex == -1) ?
-          rootGroup :
-          groups[parentGroupIndex];
+      var parentGroup =
+          (parentGroupIndex == -1) ? rootGroup : groups[parentGroupIndex];
       parentGroup.addChild(groups[i]);
     }
   }
 };
+
 
 /**
  * Finds the index in the levels for the parent group of the current group.
@@ -595,8 +596,8 @@ keepasschrome.KeyFileParser.prototype.findParentGroupIndex_ = function(
  * @param {!keepasschrome.Group} rootGroup The top group.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.assignEntriesToGroups_ = function(entries,
-    groups, rootGroup) {
+keepasschrome.KeyFileParser.prototype.assignEntriesToGroups_ = function(
+    entries, groups, rootGroup) {
   for (var e = 0; e < entries.length; e++) {
     var group = this.findGroup_(entries[e], groups, rootGroup);
     group.addEntry(entries[e]);
@@ -613,8 +614,8 @@ keepasschrome.KeyFileParser.prototype.assignEntriesToGroups_ = function(entries,
  *     first group if the entry's group doesn't exist.
  * @private
  */
-keepasschrome.KeyFileParser.prototype.findGroup_ = function(entry, groups,
-    rootGroup) {
+keepasschrome.KeyFileParser.prototype.findGroup_ = function(
+    entry, groups, rootGroup) {
   for (var g = 0; g < groups.length; g++) {
     if (entry.groupId == groups[g].getId()) {
       return groups[g];

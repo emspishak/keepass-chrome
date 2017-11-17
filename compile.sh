@@ -8,7 +8,7 @@ OUTPUT="$OUTPUT_DIR/keepass-chrome.js"
 
 mkdir -p $OUTPUT_DIR
 
-gjslint *.js
+gjslint --strict *.js
 closure-compiler \
   --js_output_file $OUTPUT \
   --compilation_level ADVANCED_OPTIMIZATIONS \

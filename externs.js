@@ -4,6 +4,7 @@
 var drive;
 
 
+
 /**
  * A Drive API v2 Files list response. From
  * https://developers.google.com/drive/v2/reference/files/list
@@ -11,8 +12,10 @@ var drive;
  */
 drive.FilesListResponse = function() {};
 
+
 /** @type {!Array<drive.File>} */
 drive.FilesListResponse.prototype.items;
+
 
 
 /**
@@ -22,14 +25,18 @@ drive.FilesListResponse.prototype.items;
  */
 drive.File = function() {};
 
+
 /** @type {string} */
 drive.File.prototype.title;
+
 
 /** @type {string} */
 drive.File.prototype.modifiedDate;
 
+
 /** @type {string} */
 drive.File.prototype.id;
+
 
 /** @type {string} */
 drive.File.prototype.downloadUrl;

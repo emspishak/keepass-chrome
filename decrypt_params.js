@@ -2,6 +2,8 @@
  * @fileoverview A struct that stores the data needed to decrypt a key file.
  */
 
+
+
 /**
  * @param {!keepasschrome.KeyFileHeader.Flags} headerFlags
  * @param {!Uint8Array} encryptedData
@@ -11,8 +13,8 @@
  * @constructor
  * @struct
  */
-keepasschrome.DecryptParams = function(headerFlags, encryptedData,
-    encryptionInitialValue, contentsHash, key) {
+keepasschrome.DecryptParams = function(
+    headerFlags, encryptedData, encryptionInitialValue, contentsHash, key) {
 
   /** @type {!keepasschrome.KeyFileHeader.Flags} */
   this.headerFlags = headerFlags;
