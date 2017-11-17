@@ -13,8 +13,10 @@ closure-compiler \
   --js_output_file $OUTPUT \
   --compilation_level ADVANCED_OPTIMIZATIONS \
   --warning_level=VERBOSE \
-  --externs <(curl -s $CHROME_EXTERNS) <(curl -s $CHROME_EXTENSIONS_EXTERNS) \
+  --externs externs.js <(curl -s $CHROME_EXTERNS) <(curl -s $CHROME_EXTENSIONS_EXTERNS) \
   --language_in ECMASCRIPT6_STRICT \
   --summary_detail_level=3 \
   --jscomp_error=lintChecks \
+  --jscomp_error=reportUnknownTypes \
+  --jscomp_warning="*" \
   --js $FILES

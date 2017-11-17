@@ -61,7 +61,8 @@ keepasschrome.Popup.prototype.checkError_ = function() {
  * @private
  */
 keepasschrome.Popup.prototype.searchForKeyFile_ = function() {
-  var query = document.getElementById('key-file-name').value;
+  var query = ( /** @type {!HTMLInputElement} */ (
+      document.getElementById('key-file-name'))).value;
   var encodedQuery = encodeURIComponent(query).replace("'", "\\'");
   document.getElementById('files').innerHTML = '';
   this.showLoading_('Searching Drive...');
@@ -114,7 +115,7 @@ keepasschrome.Popup.prototype.getAuthTokenCallback_ = function(method, url,
   }
   xhr.setRequestHeader('Authorization', 'Bearer ' + opt_token);
   xhr.onload = function() {
-    callback(this);
+    callback(xhr);
   };
   xhr.send();
 };
@@ -127,21 +128,22 @@ keepasschrome.Popup.prototype.getAuthTokenCallback_ = function(method, url,
  * @private
  */
 keepasschrome.Popup.prototype.displayFiles_ = function(request) {
-  var files = JSON.parse(request.responseText);
+  var files = /** @type {drive.FilesListResponse} */ (
+      JSON.parse(request.responseText));
   var ul = document.getElementById('files');
   ul.innerHTML = '';
-  if (files['items']['length']) {
-    for (var i = 0; i < files['items']['length']; i++) {
-      var file = files['items'][i];
+  if (files.items.length) {
+    for (var i = 0; i < files.items.length; i++) {
+      var file = files.items[i];
       var filename = document.createElement('div');
-      filename.textContent = file['title'];
+      filename.textContent = file.title;
       var modified = document.createElement('div');
-      modified.textContent = 'Last modified: ' + new Date(file['modifiedDate']);
+      modified.textContent = 'Last modified: ' + new Date(file.modifiedDate);
       var li = document.createElement('li');
       li.appendChild(filename);
       li.appendChild(modified);
       li.addEventListener('click',
-          this.handleKeyFileClick_.bind(this, file['id']));
+          this.handleKeyFileClick_.bind(this, file.id));
       ul.appendChild(li);
     }
   } else {
@@ -197,9 +199,8 @@ keepasschrome.Popup.prototype.handleMasterPasswordOkClick_ =
  * @private
  */
 keepasschrome.Popup.prototype.fetchKeyFile_ = function(request) {
-  var file = JSON.parse(request.responseText);
-  var downloadUrl = file['downloadUrl'];
-  this.sendXhr_('GET', downloadUrl, this.processKeyFile_.bind(this),
+  var file = /** @type {!drive.File} */ (JSON.parse(request.responseText));
+  this.sendXhr_('GET', file.downloadUrl, this.processKeyFile_.bind(this),
       'arraybuffer');
 };
 
@@ -212,7 +213,8 @@ keepasschrome.Popup.prototype.fetchKeyFile_ = function(request) {
  */
 keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
   this.showLoading_('Processing key file...');
-  var password = document.getElementById('master-password').value;
+  var password = ( /** @type {HTMLInputElement} */ (
+      document.getElementById('master-password'))).value;
   var response = request.response;
   if (!(response instanceof ArrayBuffer)) {
     this.showError_('XHR response expected to be ArrayBuffer but got ' +
@@ -226,19 +228,36 @@ keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
     progressBar.render(loadingElement);
   }
   new keepasschrome.KeyFileParser(response).parse(password, progressBar).then(
-    function(rootGroup) {
-        this.showGroups_(rootGroup);
-        this.hideLoading_();
-    }.bind(this),
-    function(e) {
-        if (e.message) {
-          this.showError_(e.message);
-        } else {
-          this.showError_('Error decrypting, the password is probably wrong.');
-        }
-        this.showMasterPassword_();
-        this.hideLoading_();
-    }.bind(this));
+    this.displayKeyFile_.bind(this),
+    this.displayDecryptionError_.bind(this));
+};
+
+
+/**
+ * Displays the key file.
+ * @param {!keepasschrome.Group} rootGroup The root of the group tree.
+ * @private
+ */
+keepasschrome.Popup.prototype.displayKeyFile_ = function(rootGroup) {
+  this.showGroups_(rootGroup);
+  this.hideLoading_();
+};
+
+
+/**
+ * Displays an error message if it was unable to decrypt the key file.
+ * @param {*} e The error.
+ * @private
+ */
+keepasschrome.Popup.prototype.displayDecryptionError_ = function(e) {
+  e = /** @type {!Error} */ (e);
+  if (e.message) {
+    this.showError_(e.message);
+  } else {
+    this.showError_('Error decrypting, the password is probably wrong.');
+  }
+  this.showMasterPassword_();
+  this.hideLoading_();
 };
 
 

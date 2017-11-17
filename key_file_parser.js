@@ -205,7 +205,8 @@ keepasschrome.KeyFileParser.prototype.generateCryptoKey_ = function(params) {
  * (it's not secure) so this uses AES-CBC encryption as described at
  * http://crypto.stackexchange.com/a/21050 to get AES-EBC encryption.
  * @param {!keepasschrome.TransformKeyParams} params The transform key params.
- * @return {!Promise<!keepasschrome.TransformKeyParams>}
+ * @return {!Promise<!keepasschrome.TransformKeyParams>} The transform key
+ *     params with the encrypted key.
  * @private
  */
 keepasschrome.KeyFileParser.prototype.encryptKey_ = function(params) {
@@ -213,18 +214,32 @@ keepasschrome.KeyFileParser.prototype.encryptKey_ = function(params) {
   return Promise.all([
           this.encryptPartialKey_(params, 0),
           this.encryptPartialKey_(params, Constants.ECB_BLOCK_SIZE)])
-      .then(function(partialKeys) {
-          var firstHalf = partialKeys[0];
-          var secondHalf = partialKeys[1];
+      .then(this.finishEncryptKey_.bind(this, params));
+};
 
-          var combined = new ArrayBuffer(Constants.SHA256_HASH_LENGTH);
-          var combinedView = new Uint8Array(combined);
-          combinedView.set(firstHalf);
-          combinedView.set(secondHalf, Constants.ECB_BLOCK_SIZE);
-          params.encryptedKey = combined;
-          this.progressBar_.encryptionRoundComplete();
-          return params;
-      }.bind(this));
+
+/**
+ * Combines the encrypted parts into the overall key and sets it on params.
+ * @param {!keepasschrome.TransformKeyParams} params The transfork key params.
+ * @param {!Array<!Uint8Array>} partialKeys Two parts of the key to combine into
+ *     the overall key.
+ * @return {!keepasschrome.TransformKeyParams} The transform key params with the
+ *     encrypted key.
+ * @private
+ */
+keepasschrome.KeyFileParser.prototype.finishEncryptKey_ = function(params,
+    partialKeys) {
+  var firstHalf = partialKeys[0];
+  var secondHalf = partialKeys[1];
+
+  var combined =
+      new ArrayBuffer(keepasschrome.KeyFileParser.SHA256_HASH_LENGTH);
+  var combinedView = new Uint8Array(combined);
+  combinedView.set(firstHalf);
+  combinedView.set(secondHalf, keepasschrome.KeyFileParser.ECB_BLOCK_SIZE);
+  params.encryptedKey = combined;
+  this.progressBar_.encryptionRoundComplete();
+  return params;
 };
 
 
@@ -332,14 +347,24 @@ keepasschrome.KeyFileParser.prototype.decryptAes_ = function(decryptParams) {
 keepasschrome.KeyFileParser.prototype.verifyDecryptedData_ = function(
     decryptParams) {
   return this.hash_(decryptParams.decryptedData)
-      .then(function(decryptedDataHash) {
-          if (this.arrayBuffersEqual_(decryptParams.contentsHash,
-              decryptedDataHash)) {
-            return decryptParams.decryptedData;
-          } else {
-            throw new Error('Invalid password');
-          }
-      }.bind(this));
+      .then(this.finishVerifyDecryptedData_.bind(this, decryptParams));
+};
+
+
+/**
+ * Verifies the decrypted data has the correct hash, throws an Error if not.
+ * @param {!keepasschrome.DecryptParams} decryptParams The decrpyt params.
+ * @param {!ArrayBuffer} decryptedDataHash The hash of the decrypted data.
+ * @return {!ArrayBuffer} The decrypted data.
+ * @private
+ */
+keepasschrome.KeyFileParser.prototype.finishVerifyDecryptedData_ =
+    function(decryptParams, decryptedDataHash) {
+  if (this.arrayBuffersEqual_(decryptParams.contentsHash, decryptedDataHash)) {
+    return decryptParams.decryptedData;
+  } else {
+    throw new Error('Invalid password');
+  }
 };
 
 
