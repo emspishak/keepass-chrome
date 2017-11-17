@@ -220,7 +220,6 @@ keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
     this.showMasterPassword_();
     return;
   }
-  var rootGroup;
   var progressBar = new keepasschrome.DecryptProgressBar();
   var loadingElement = document.getElementById('loading');
   if (loadingElement) {
