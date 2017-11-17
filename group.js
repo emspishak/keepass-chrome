@@ -41,13 +41,13 @@ keepasschrome.Group = function(id, title, image) {
   this.index_ = -1;
 
   /**
-   * @type {!Array.<!keepasschrome.Group>}
+   * @type {!Array<!keepasschrome.Group>}
    * @private
    */
   this.children_ = [];
 
   /**
-   * @type {!Array.<!keepasschrome.Entry>}
+   * @type {!Array<!keepasschrome.Entry>}
    * @private
    */
   this.entries_ = [];
@@ -98,7 +98,7 @@ keepasschrome.Group.prototype.getChild = function(index) {
 
 
 /**
- * @return {!Array.<!keepasschrome.Group>} The child groups.
+ * @return {!Array<!keepasschrome.Group>} The child groups.
  */
 keepasschrome.Group.prototype.getChildren = function() {
   return this.children_;
@@ -116,7 +116,7 @@ keepasschrome.Group.prototype.addEntry = function(entry) {
 
 
 /**
- * @return {!Array.<!keepasschrome.Entry>} The entries.
+ * @return {!Array<!keepasschrome.Entry>} The entries.
  */
 keepasschrome.Group.prototype.getEntries = function() {
   return this.entries_;

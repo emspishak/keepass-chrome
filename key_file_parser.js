@@ -33,7 +33,7 @@ keepasschrome.KeyFileParser = function(arraybuffer) {
  * @param {string} password The password to decrypt the keyfile.
  * @param {!keepasschrome.DecryptProgressBar} progressBar A progress bar to show
  *     the decryption status.
- * @return {!Promise.<!keepasschrome.Group>} A promise that resolves to the top
+ * @return {!Promise<!keepasschrome.Group>} A promise that resolves to the top
  *     group of the keyfile.
  */
 keepasschrome.KeyFileParser.prototype.parse = function(password, progressBar) {
@@ -153,7 +153,7 @@ keepasschrome.KeyFileParser.prototype.transformKey_ = function(plainTextKey,
 /**
  * Hashes the plain text key.
  * @param {!keepasschrome.TransformKeyParams} params The transform key params.
- * @return {!Promise.<!keepasschrome.TransformKeyParams>} The transform key
+ * @return {!Promise<!keepasschrome.TransformKeyParams>} The transform key
  *     params with the hashed plain text key.
  * @private
  */
@@ -170,7 +170,7 @@ keepasschrome.KeyFileParser.prototype.hashKey_ = function(params) {
 /**
  * Hashes the given array buffer.
  * @param {!ArrayBuffer|!ArrayBufferView} arrayBuffer The array buffer to hash.
- * @return {!Promise.<!ArrayBuffer>} A promise that resolves to the hashed
+ * @return {!Promise<!ArrayBuffer>} A promise that resolves to the hashed
  *     input.
  * @private
  */
@@ -182,7 +182,7 @@ keepasschrome.KeyFileParser.prototype.hash_ = function(arrayBuffer) {
 /**
  * Generates the crypto key to encrypt the key.
  * @param {!keepasschrome.TransformKeyParams} params The transform key params.
- * @return {!Promise.<!keepasschrome.TransformKeyParams>} The transform key
+ * @return {!Promise<!keepasschrome.TransformKeyParams>} The transform key
  *     params with the crypto key.
  * @private
  */
@@ -205,7 +205,7 @@ keepasschrome.KeyFileParser.prototype.generateCryptoKey_ = function(params) {
  * (it's not secure) so this uses AES-CBC encryption as described at
  * http://crypto.stackexchange.com/a/21050 to get AES-EBC encryption.
  * @param {!keepasschrome.TransformKeyParams} params The transform key params.
- * @return {!Promise.<!keepasschrome.TransformKeyParams>}
+ * @return {!Promise<!keepasschrome.TransformKeyParams>}
  * @private
  */
 keepasschrome.KeyFileParser.prototype.encryptKey_ = function(params) {
@@ -232,7 +232,7 @@ keepasschrome.KeyFileParser.prototype.encryptKey_ = function(params) {
  * AES-ECB encrypts a single block (16 bytes).
  * @param {!keepasschrome.TransformKeyParams} params The transform key params.
  * @param {number} startIndex The starting index of the block to encrypt.
- * @return {!Promise.<!Uint8Array>} The encrypted block.
+ * @return {!Promise<!Uint8Array>} The encrypted block.
  * @private
  */
 keepasschrome.KeyFileParser.prototype.encryptPartialKey_ = function(params,
@@ -260,7 +260,7 @@ keepasschrome.KeyFileParser.prototype.encryptPartialKey_ = function(params,
  *     encryption.
  * @param {!Uint8Array} contentsHash The correct hash of the contents.
  * @param {!ArrayBuffer} key The key to decrypt the key file.
- * @return {!Promise.<!ArrayBuffer>} A promise that resolves to the decrypted
+ * @return {!Promise<!ArrayBuffer>} A promise that resolves to the decrypted
  *     keyfile.
  * @private
  */
@@ -281,7 +281,7 @@ keepasschrome.KeyFileParser.prototype.decryptFile_ = function(headerFlags,
 /**
  * Generates the crypto key to decrypt the file.
  * @param {!keepasschrome.DecryptParams} decryptParams The decrypt params.
- * @return {!Promise.<!keepasschrome.DecryptParams>} The decrypt params with the
+ * @return {!Promise<!keepasschrome.DecryptParams>} The decrypt params with the
  *     crypto key.
  * @private
  */
@@ -303,7 +303,7 @@ keepasschrome.KeyFileParser.prototype.generateDecryptCryptoKey_ = function(
 /**
  * Decrypts the keyfile with AES.
  * @param {!keepasschrome.DecryptParams} decryptParams The decrypt params.
- * @return {!Promise.<!keepasschrome.DecryptParams>} A promise that resolves to
+ * @return {!Promise<!keepasschrome.DecryptParams>} A promise that resolves to
  *     the decrypt params with the decrypted key file.
  * @private
  */
@@ -325,7 +325,7 @@ keepasschrome.KeyFileParser.prototype.decryptAes_ = function(decryptParams) {
  * Verifies that the data was correctly decrypted, mainly to determine if the
  * password was correct.
  * @param {!keepasschrome.DecryptParams} decryptParams The decrypt params.
- * @return {!Promise.<!ArrayBuffer>} A promise that resolves to the decrpyted
+ * @return {!Promise<!ArrayBuffer>} A promise that resolves to the decrpyted
  *     data.
  * @private
  */
@@ -406,7 +406,7 @@ keepasschrome.KeyFileParser.prototype.parseContents_ = function(numGroups,
 /**
  * Reads in a group from the decrypted key file.
  * @param {!keepasschrome.BinaryReader} contents The decrypted key file.
- * @param {!Array.<number>} levels A list of the levels.
+ * @param {!Array<number>} levels A list of the levels.
  * @return {!keepasschrome.Group} the parsed group.
  * @private
  */
@@ -520,8 +520,8 @@ keepasschrome.KeyFileParser.prototype.readEntry_ = function(contents) {
 
 /**
  * Builds the groups into a tree.
- * @param {!Array.<number>} levels A list of the levels.
- * @param {!Array.<!keepasschrome.Group>} groups The groups.
+ * @param {!Array<number>} levels A list of the levels.
+ * @param {!Array<!keepasschrome.Group>} groups The groups.
  * @param {!keepasschrome.Group} rootGroup The top group.
  * @private
  */
@@ -543,7 +543,7 @@ keepasschrome.KeyFileParser.prototype.createGroupTree_ = function(levels,
 /**
  * Finds the index in the levels for the parent group of the current group.
  * @param {number} currentGroupIndex The index of the current group.
- * @param {!Array.<number>} levels A list of the levels.
+ * @param {!Array<number>} levels A list of the levels.
  * @return {number} The index in the levels of the parent group.
  * @private
  */
@@ -565,8 +565,8 @@ keepasschrome.KeyFileParser.prototype.findParentGroupIndex_ = function(
 
 /**
  * Puts entries in their group.
- * @param {!Array.<!keepasschrome.Entry>} entries The entries.
- * @param {!Array.<!keepasschrome.Group>} groups The groups.
+ * @param {!Array<!keepasschrome.Entry>} entries The entries.
+ * @param {!Array<!keepasschrome.Group>} groups The groups.
  * @param {!keepasschrome.Group} rootGroup The top group.
  * @private
  */
@@ -582,7 +582,7 @@ keepasschrome.KeyFileParser.prototype.assignEntriesToGroups_ = function(entries,
 /**
  * Finds the group that the given entry belongs in.
  * @param {!keepasschrome.Entry} entry The entry.
- * @param {!Array.<!keepasschrome.Group>} groups The groups.
+ * @param {!Array<!keepasschrome.Group>} groups The groups.
  * @param {!keepasschrome.Group} rootGroup The top group.
  * @return {!keepasschrome.Group} The group that the entry belongs in, or the
  *     first group if the entry's group doesn't exist.
