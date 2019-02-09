@@ -371,9 +371,9 @@ keepasschrome.KeyFileParser.prototype.finishVerifyDecryptedData_ = function(
 
 /**
  * Determines if the two ArrayBuffers are equal.
- * @param {ArrayBuffer|ArrayBufferView} buffer1 The first ArrayBuffer to
+ * @param {!ArrayBuffer|!ArrayBufferView} buffer1 The first ArrayBuffer to
  *     compare.
- * @param {ArrayBuffer|ArrayBufferView} buffer2 The second ArrayBuffer to
+ * @param {!ArrayBuffer|!ArrayBufferView} buffer2 The second ArrayBuffer to
  *     compare.
  * @return {boolean} true if the two ArrayBuffers have the same content, false
  *     otherwise.

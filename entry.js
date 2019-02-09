@@ -10,7 +10,7 @@
  */
 keepasschrome.Entry = function() {
 
-  /** @type {Uint8Array} */
+  /** @type {!Uint8Array} */
   this.uuid;
 
   /** @type {number} */
@@ -34,25 +34,25 @@ keepasschrome.Entry = function() {
   /** @type {string} */
   this.comment;
 
-  /** @type {Date} */
+  /** @type {!Date} */
   this.creation;
 
-  /** @type {Date} */
+  /** @type {!Date} */
   this.lastModified;
 
-  /** @type {Date} */
+  /** @type {!Date} */
   this.lastAccessed;
 
-  /** @type {Date} */
+  /** @type {!Date} */
   this.expires;
 
   /** @type {string} */
   this.binaryDesc;
 
-  /** @type {Uint8Array} */
+  /** @type {!Uint8Array} */
   this.binary;
 
-  /** @type {keepasschrome.Group} */
+  /** @type {!keepasschrome.Group} */
   this.group;
 
   /** @type {number} */

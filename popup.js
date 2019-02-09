@@ -136,7 +136,8 @@ keepasschrome.Popup.prototype.getAuthTokenCallback_ = function(
  */
 keepasschrome.Popup.prototype.displayFiles_ = function(request) {
   var files =
-      /** @type {drive.FilesListResponse} */ (JSON.parse(request.responseText));
+      /** @type {!drive.FilesListResponse} */ (
+          JSON.parse(request.responseText));
   var ul = document.getElementById('files');
   ul.innerHTML = '';
   if (files.items.length) {
@@ -221,7 +222,7 @@ keepasschrome.Popup.prototype.fetchKeyFile_ = function(request) {
  */
 keepasschrome.Popup.prototype.processKeyFile_ = function(request) {
   this.showLoading_('Processing key file...');
-  var password = (/** @type {HTMLInputElement} */ (
+  var password = (/** @type {!HTMLInputElement} */ (
       document.getElementById('master-password'))).value;
   var response = request.response;
   if (!(response instanceof ArrayBuffer)) {
