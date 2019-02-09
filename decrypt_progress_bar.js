@@ -1,37 +1,20 @@
-/**
- * @fileoverview A progress bar for the decryption process.
- */
+/** @fileoverview A progress bar for the decryption process. */
 
 
 
-/**
- * @constructor
- */
+/** @constructor */
 keepasschrome.DecryptProgressBar = function() {
 
-  /**
-   * @type {number}
-   * @private
-   */
+  /** @private {number} */
   this.totalEncryptionRounds_;
 
-  /**
-   * @type {number}
-   * @private
-   */
+  /** @private {number} */
   this.completedEncryptionRounds_ = 0;
 
-  /**
-   * @type {!Element}
-   * @private
-   */
+  /** @private {!Element} */
   this.progressBarInnerElement_;
 
-
-  /**
-   * @type {number}
-   * @private
-   */
+  /** @private {number} */
   this.progressBarWidth_;
 };
 
@@ -66,9 +49,7 @@ keepasschrome.DecryptProgressBar.prototype.setTotalEncryptionRounds = function(
 };
 
 
-/**
- * Call when a single encryption round is complete.
- */
+/** Call when a single encryption round is complete. */
 keepasschrome.DecryptProgressBar.prototype.encryptionRoundComplete =
     function() {
   this.completedEncryptionRounds_++;

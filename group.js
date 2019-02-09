@@ -1,6 +1,4 @@
-/**
- * @fileoverview A group in a keyfile.
- */
+/** @fileoverview A group in a keyfile. */
 
 
 
@@ -12,77 +10,48 @@
  */
 keepasschrome.Group = function(id, title, image) {
 
-  /**
-   * @type {number}
-   * @private
-   */
+  /** @private @const {number} */
   this.id_ = id;
 
-  /**
-   * @type {string}
-   * @private
-   */
+  /** @private @const {string} */
   this.title_ = title;
 
-  /**
-   * @type {number}
-   * @private
-   */
+  /** @private @const {number} */
   this.image_ = image;
 
-  /**
-   * @type {?keepasschrome.Group}
-   * @private
-   */
+  /** @private {?keepasschrome.Group} */
   this.parent_ = null;
 
-  /**
-   * @type {number}
-   * @private
-   */
+  /** @private {number} */
   this.index_ = -1;
 
-  /**
-   * @type {!Array<!keepasschrome.Group>}
-   * @private
-   */
+  /** @private @const {!Array<!keepasschrome.Group>} */
   this.children_ = [];
 
-  /**
-   * @type {!Array<!keepasschrome.Entry>}
-   * @private
-   */
+  /** @private @const {!Array<!keepasschrome.Entry>} */
   this.entries_ = [];
 };
 
 
-/**
- * @return {number} The ID.
- */
+/** @return {number} The ID. */
 keepasschrome.Group.prototype.getId = function() {
   return this.id_;
 };
 
 
-/**
- * @return {string} The title.
- */
+/** @return {string} The title. */
 keepasschrome.Group.prototype.getTitle = function() {
   return this.title_;
 };
 
 
-/**
- * @return {number} The image.
- */
+/** @return {number} The image. */
 keepasschrome.Group.prototype.getImage = function() {
   return this.image_;
 };
 
 
-/**
- * @param {!keepasschrome.Group} child The child to add.
- */
+/** @param {!keepasschrome.Group} child The child to add. */
 keepasschrome.Group.prototype.addChild = function(child) {
   child.parent_ = this;
   child.index_ = this.children_.length;
@@ -99,17 +68,13 @@ keepasschrome.Group.prototype.getChild = function(index) {
 };
 
 
-/**
- * @return {!Array<!keepasschrome.Group>} The child groups.
- */
+/** @return {!Array<!keepasschrome.Group>} The child groups. */
 keepasschrome.Group.prototype.getChildren = function() {
   return this.children_;
 };
 
 
-/**
- * @param {!keepasschrome.Entry} entry The entry to add.
- */
+/** @param {!keepasschrome.Entry} entry The entry to add. */
 keepasschrome.Group.prototype.addEntry = function(entry) {
   entry.group = this;
   entry.index = this.entries_.length;
@@ -117,9 +82,7 @@ keepasschrome.Group.prototype.addEntry = function(entry) {
 };
 
 
-/**
- * @return {!Array<!keepasschrome.Entry>} The entries.
- */
+/** @return {!Array<!keepasschrome.Entry>} The entries. */
 keepasschrome.Group.prototype.getEntries = function() {
   return this.entries_;
 };

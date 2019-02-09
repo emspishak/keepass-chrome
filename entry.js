@@ -1,13 +1,8 @@
-/**
- * @fileoverview An entry in a keyfile.
- */
+/** @fileoverview An entry in a keyfile. */
 
 
 
-/**
- * @constructor
- * @struct
- */
+/** @constructor @struct */
 keepasschrome.Entry = function() {
 
   /** @type {!Uint8Array} */

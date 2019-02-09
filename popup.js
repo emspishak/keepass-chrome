@@ -1,6 +1,4 @@
-/**
- * @fileoverview Manages the UI of the KeePass Chrome extension.
- */
+/** @fileoverview Manages the UI of the KeePass Chrome extension. */
 
 var keepasschrome = {};
 
@@ -10,17 +8,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-/**
- * @constructor
- */
+/** @constructor */
 keepasschrome.Popup = function() {};
 /** @const */ keepasschrome.Popup.API_BASE =
     'https://www.googleapis.com/drive/v2';
 
 
-/**
- * Starts the KeyPass Chrome extension.
- */
+/** Starts the KeyPass Chrome extension. */
 keepasschrome.Popup.prototype.start = function() {
   this.onEnter_('key-file-name', this.searchForKeyFile_.bind(this));
   document.getElementById('key-file-search')
@@ -37,9 +31,7 @@ keepasschrome.Popup.prototype.showError_ = function(message) {
 };
 
 
-/**
- * @private
- */
+/** @private */
 keepasschrome.Popup.prototype.hideError_ = function() {
   document.getElementById('error').innerHTML = '';
 };

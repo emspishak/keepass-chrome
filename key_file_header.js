@@ -1,6 +1,4 @@
-/**
- * @fileoverview A keyfile header.
- */
+/** @fileoverview A keyfile header. */
 
 
 
@@ -59,10 +57,7 @@ keepasschrome.KeyFileHeader = function(
 
 
 
-/**
- * @constructor
- * @struct
- */
+/** @constructor @struct */
 keepasschrome.KeyFileHeader.Flags = function() {
 
   /** @type {boolean} */

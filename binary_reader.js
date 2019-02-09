@@ -1,6 +1,4 @@
-/**
- * @fileoverview Reads binary data.
- */
+/** @fileoverview Reads binary data. */
 
 
 
@@ -10,31 +8,21 @@
  */
 keepasschrome.BinaryReader = function(arraybuffer) {
 
-  /**
-   * @type {!Uint8Array}
-   * @private
-   */
+  /** @private @const {!Uint8Array} */
   this.data_ = new Uint8Array(arraybuffer);
 
-  /**
-   * @type {number}
-   * @private
-   */
+  /** @private {number} */
   this.pos_ = 0;
 };
 
 
-/**
- * @return {boolean} True if there's at least one more byte.
- */
+/** @return {boolean} True if there's at least one more byte. */
 keepasschrome.BinaryReader.prototype.hasNextByte = function() {
   return this.pos_ < this.data_.length;
 };
 
 
-/**
- * @return {boolean} True if there's at least one more int.
- */
+/** @return {boolean} True if there's at least one more int. */
 keepasschrome.BinaryReader.prototype.hasNextInt = function() {
   return this.pos_ < this.data_.length - 3;
 };
@@ -78,25 +66,19 @@ keepasschrome.BinaryReader.prototype.readNumber_ = function(numBytes) {
 };
 
 
-/**
- * @return {number} The short.
- */
+/** @return {number} The short. */
 keepasschrome.BinaryReader.prototype.readShort = function() {
   return this.readNumber_(2);
 };
 
 
-/**
- * @return {number} The int.
- */
+/** @return {number} The int. */
 keepasschrome.BinaryReader.prototype.readInt = function() {
   return this.readNumber_(4);
 };
 
 
-/**
- * @return {!Uint8Array} The bytes.
- */
+/** @return {!Uint8Array} The bytes. */
 keepasschrome.BinaryReader.prototype.readRest = function() {
   var bytes = this.data_.subarray(this.pos_);
   this.pos_ = this.data_.length;
@@ -119,9 +101,7 @@ keepasschrome.BinaryReader.prototype.readString = function() {
 };
 
 
-/**
- * @return {!Date} The date.
- */
+/** @return {!Date} The date. */
 keepasschrome.BinaryReader.prototype.readDate = function() {
   var bytes = this.readBytes(5);
 

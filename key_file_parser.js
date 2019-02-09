@@ -1,6 +1,4 @@
-/**
- * @fileoverview Decrypts and parses a keyfile.
- */
+/** @fileoverview Decrypts and parses a keyfile. */
 
 
 
@@ -10,16 +8,10 @@
  */
 keepasschrome.KeyFileParser = function(arraybuffer) {
 
-  /**
-   * @type {!keepasschrome.BinaryReader}
-   * @private
-   */
+  /** @private @const {!keepasschrome.BinaryReader} */
   this.bytes_ = new keepasschrome.BinaryReader(arraybuffer);
 
-  /**
-   * @type {!keepasschrome.DecryptProgressBar}
-   * @private
-   */
+  /** @private {!keepasschrome.DecryptProgressBar} */
   this.progressBar_;
 };
 /** @const */ keepasschrome.KeyFileParser.DATABASE_SIGNATURE_1 = 2594363651;

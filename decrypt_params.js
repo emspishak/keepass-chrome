@@ -1,6 +1,4 @@
-/**
- * @fileoverview A struct that stores the data needed to decrypt a key file.
- */
+/** @fileoverview A struct that stores the data needed to decrypt a key file. */
 
 
 

@@ -1,6 +1,4 @@
-/**
- * @fileoverview A struct that stores the data needed to transform a key.
- */
+/** @fileoverview A struct that stores the data needed to transform a key. */
 
 
 
